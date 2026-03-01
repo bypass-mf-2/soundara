@@ -1,0 +1,13 @@
+[
+  {
+    "type": "visit",
+    "page": "home",
+    "timestamp": "2026-03-01T18:05:00"
+  },
+  {
+    "type": "click",
+    "element": "alpha_wave_button",
+    "page": "home",
+    "timestamp": "2026-03-01T18:06:30"
+  }
+]

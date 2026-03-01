@@ -1,0 +1,4 @@
+NAME = "Alpha"
+MIN_DIFF = 8.0
+MAX_DIFF = 12.0
+DEFAULT_DIFF = 10.0
