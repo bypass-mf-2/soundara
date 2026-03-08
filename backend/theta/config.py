@@ -1,0 +1,4 @@
+NAME = "Theta"
+MIN_DIFF = 4.0
+MAX_DIFF = 7.0
+DEFAULT_DIFF = 5.5

@@ -24,10 +24,13 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
 }
 
 h1 {
@@ -66,4 +69,49 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+.audio-player-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;           /* full width */
+  height: 60px;           /* small height */
+  background-color: #1a1a1a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+  box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  font-size: 14px;
+  font-family: sans-serif;
+}
 
+.audio-player-bar .track-info {
+  flex: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 20px;
+  white-space: nowrap;
+}
+
+.audio-player-bar .controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-player-bar .controls button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.audio-player-bar .download-btn {
+  color: #00f;
+  text-decoration: none;
+  margin-left: 10px;
+}

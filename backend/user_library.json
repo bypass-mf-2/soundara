@@ -1,0 +1,6 @@
+{
+  "user1": [
+    { "track": "Ocean Waves", "file": "ocean_waves.wav", "mode": "alpha", "purchased": true },
+    { "track": "Deep Focus", "file": "deep_focus.wav", "mode": "beta", "purchased": true }
+  ]
+}

@@ -1,0 +1,4 @@
+NAME = "Delta"
+MIN_DIFF = 0.5
+MAX_DIFF = 4.0
+DEFAULT_DIFF = 2.25

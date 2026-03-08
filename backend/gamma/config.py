@@ -1,0 +1,4 @@
+NAME = "Gamma"
+MIN_DIFF = 30.0
+MAX_DIFF = 100.0
+DEFAULT_DIFF = 35.0

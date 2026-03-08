@@ -1,1 +1,625 @@
-[]
+[
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-01T11:33:21.810306"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-01T11:33:26.835298"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-01T11:33:49.189969"
+  },
+  {
+    "type": "nav_click",
+    "page": "about",
+    "timestamp": "2026-03-01T11:34:04.744373"
+  },
+  {
+    "type": "nav_click",
+    "page": "contact",
+    "timestamp": "2026-03-01T11:34:06.171205"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-01T11:34:12.173481"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-01T11:37:21.814043"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-03T19:16:16.385225"
+  },
+  {
+    "type": "nav_click",
+    "page": "pricing",
+    "timestamp": "2026-03-03T19:16:18.823300"
+  },
+  {
+    "type": "nav_click",
+    "page": "future",
+    "timestamp": "2026-03-03T19:16:23.538303"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-03T19:16:25.279256"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-04T14:50:48.463253"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-04T14:50:52.045316"
+  },
+  {
+    "type": "nav_click",
+    "page": "about",
+    "timestamp": "2026-03-04T15:04:48.192645"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-04T15:09:51.981077"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-04T15:10:31.862037"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-04T15:10:34.000171"
+  },
+  {
+    "type": "nav_click",
+    "page": "pricing",
+    "timestamp": "2026-03-04T15:10:40.816473"
+  },
+  {
+    "type": "nav_click",
+    "page": "about",
+    "timestamp": "2026-03-04T15:10:42.232344"
+  },
+  {
+    "type": "nav_click",
+    "page": "future",
+    "timestamp": "2026-03-04T15:10:44.088753"
+  },
+  {
+    "type": "nav_click",
+    "page": "future",
+    "timestamp": "2026-03-04T15:10:45.474416"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-04T15:10:50.255880"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-04T15:11:36.477221"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-04T15:16:38.245643"
+  },
+  {
+    "type": "nav_click",
+    "page": "pricing",
+    "timestamp": "2026-03-04T15:16:38.887409"
+  },
+  {
+    "type": "nav_click",
+    "page": "about",
+    "timestamp": "2026-03-04T15:16:39.927507"
+  },
+  {
+    "type": "nav_click",
+    "page": "future",
+    "timestamp": "2026-03-04T15:16:40.646337"
+  },
+  {
+    "type": "nav_click",
+    "page": "future",
+    "timestamp": "2026-03-04T15:16:41.368879"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-04T15:18:19.262073"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-04T15:18:26.870215"
+  },
+  {
+    "type": "nav_click",
+    "page": "pricing",
+    "timestamp": "2026-03-04T15:18:29.178734"
+  },
+  {
+    "type": "nav_click",
+    "page": "about",
+    "timestamp": "2026-03-04T15:18:30.620110"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-04T15:20:35.885229"
+  },
+  {
+    "type": "nav_click",
+    "page": "future",
+    "timestamp": "2026-03-04T15:21:04.421110"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-04T15:23:21.483349"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-04T15:24:28.203232"
+  },
+  {
+    "type": "nav_click",
+    "page": "future",
+    "timestamp": "2026-03-04T15:26:46.846728"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-04T15:26:52.609301"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-04T15:33:53.571927"
+  },
+  {
+    "type": "login",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "timestamp": "2026-03-04T16:54:59.302874"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-06T09:47:02.552691"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "timestamp": "2026-03-06T09:51:02.466804"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-06T09:51:03.699296"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-06T10:05:43.040956"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "timestamp": "2026-03-06T10:23:45.092225"
+  },
+  {
+    "type": "login",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "timestamp": "2026-03-06T10:26:55.973667"
+  },
+  {
+    "type": "logout",
+    "timestamp": "2026-03-06T10:30:10.117617"
+  },
+  {
+    "type": "login",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "timestamp": "2026-03-06T10:30:14.704074"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T10:38:15.912448"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T10:38:50.257348"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T10:42:12.058953"
+  },
+  {
+    "type": "nav_click",
+    "page": "contact",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T16:34:54.302176"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T16:36:47.119061"
+  },
+  {
+    "type": "nav_click",
+    "page": "about",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T16:39:09.604026"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T16:42:38.879234"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-06T18:38:32.190032"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T19:03:52.865327"
+  },
+  {
+    "type": "logout",
+    "timestamp": "2026-03-06T19:11:37.616491"
+  },
+  {
+    "type": "login",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKKNS1o5auL9p1xx1SzbhjS0xALhHf6IQNgqIR0bjiUEQ4jdIH8=s96-c",
+    "timestamp": "2026-03-06T19:12:00.939163"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T22:09:31.118835"
+  },
+  {
+    "type": "nav_click",
+    "page": "pricing",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T22:09:49.181749"
+  },
+  {
+    "type": "nav_click",
+    "page": "future",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T22:09:54.682235"
+  },
+  {
+    "type": "nav_click",
+    "page": "contact",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T22:09:59.344000"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T22:10:05.946027"
+  },
+  {
+    "type": "nav_click",
+    "page": "pricing",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T22:10:07.106060"
+  },
+  {
+    "type": "nav_click",
+    "page": "about",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T22:10:08.187929"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-06T22:10:54.318200"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T08:30:09.937045"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T15:12:43.727668"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T15:24:36.110276"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T15:27:37.296824"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T15:28:12.854397"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKKNS1o5auL9p1xx1SzbhjS0xALhHf6IQNgqIR0bjiUEQ4jdIH8=s96-c",
+    "timestamp": "2026-03-07T15:32:50.084080"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKKNS1o5auL9p1xx1SzbhjS0xALhHf6IQNgqIR0bjiUEQ4jdIH8=s96-c",
+    "timestamp": "2026-03-07T15:32:50.086770"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKKNS1o5auL9p1xx1SzbhjS0xALhHf6IQNgqIR0bjiUEQ4jdIH8=s96-c",
+    "id": "101546456803547093189",
+    "timestamp": "2026-03-07T15:58:49.949893"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKKNS1o5auL9p1xx1SzbhjS0xALhHf6IQNgqIR0bjiUEQ4jdIH8=s96-c",
+    "id": "101546456803547093189",
+    "timestamp": "2026-03-07T15:58:49.959251"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "timestamp": "2026-03-07T16:17:48.950194"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "timestamp": "2026-03-07T16:24:04.646689"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "timestamp": "2026-03-07T16:29:26.348944"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "timestamp": "2026-03-07T16:29:28.955859"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "timestamp": "2026-03-07T16:29:33.167884"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "timestamp": "2026-03-07T16:29:41.522040"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKKNS1o5auL9p1xx1SzbhjS0xALhHf6IQNgqIR0bjiUEQ4jdIH8=s96-c",
+    "id": "101546456803547093189",
+    "timestamp": "2026-03-07T16:38:42.594172"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKKNS1o5auL9p1xx1SzbhjS0xALhHf6IQNgqIR0bjiUEQ4jdIH8=s96-c",
+    "id": "101546456803547093189",
+    "timestamp": "2026-03-07T16:38:44.201522"
+  },
+  {
+    "type": "add_to_playlist",
+    "user": "101546456803547093189",
+    "name": "Trevor Goodwill",
+    "email": "trevorm.goodwill@gmail.com",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocKKNS1o5auL9p1xx1SzbhjS0xALhHf6IQNgqIR0bjiUEQ4jdIH8=s96-c",
+    "id": "101546456803547093189",
+    "timestamp": "2026-03-07T16:38:45.653890"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T16:48:57.890983"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T17:00:12.372173"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T17:16:26.926400"
+  },
+  {
+    "type": "audio_pause",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T17:16:26.933516"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T17:30:51.490839"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T17:34:11.209536"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T17:36:50.653751"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T17:40:27.445823"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T18:04:11.800261"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T18:05:31.263031"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T18:17:28.936469"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T18:19:57.919617"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T18:24:46.997913"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T18:28:38.302464"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T18:28:54.175601"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T18:30:08.820602"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T18:30:11.412873"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T18:44:06.804261"
+  },
+  {
+    "type": "audio_play",
+    "track": "Die with a smile",
+    "timestamp": "2026-03-07T18:44:10.674379"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T18:46:51.761076"
+  },
+  {
+    "type": "nav_click",
+    "page": "pricing",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T18:47:31.983789"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T18:48:14.857678"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T18:48:15.890266"
+  },
+  {
+    "type": "nav_click",
+    "page": "library",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T18:48:17.731361"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-03-07T18:49:54.001696"
+  }
+]

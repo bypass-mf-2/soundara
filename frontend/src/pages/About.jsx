@@ -11,14 +11,44 @@ export default function About() {
         </p>
         <p>
           You can upload your own tracks, explore our library, and enjoy personalized
-          sound modes designed to enhance focus, relaxation, and sleep.
+          sound modes designed to enhance focus, relaxation, and sleep so you can
+          enjoy the best of both worlds.
         </p>
         <p>
           This idea was originally inspired by experiments done by the Monroe Institute
-          and the CIA in the 1980s. The program explored conscious enhancement, remote
+          and the CIA in the 1980s. The program, the "Gateway Experiments" explored conscious enhancement, remote
           viewing, and altered states for intelligence gathering through hemi-sync,
           which is induced by binaural beats. Hemi-sync is the idea of syncing your
           left and right brain hemispheres together.
+        </p>
+        <div>
+  <p>
+    Visit the Monroe Institute website to learn more:{" "}
+    <a 
+      href="https://www.monroeinstitute.org/?srsltid=AfmBOopuw8nI9rEXmm2wUXmUpGQsaOgetNdcQJ1fzBeIhy8yoHxG_3ep" 
+      target="_blank" 
+      rel="noopener noreferrer"
+    >
+      monroeinstitute.org
+    </a>
+  </p>
+
+  <p>
+    Or watch this ground-breaking YouTube video:{" "}
+    <a 
+      href="https://www.youtube.com/watch?v=46E_FX-KxZ8" 
+      target="_blank" 
+      rel="noopener noreferrer"
+    >
+      Watch on YouTube
+    </a>
+  </p>
+</div>
+        <p>
+          Bottom Line:
+          Don't just take our word for it, there is plenty of anecdotal evidence.
+
+          Frequency is the future. How will you use it to your benefit?
         </p>
 
         <h1 style={{ marginTop: "40px" }}>About Frequencies</h1>

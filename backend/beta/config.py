@@ -1,0 +1,4 @@
+NAME = "Beta"
+MIN_DIFF = 12.0
+MAX_DIFF = 30.0
+DEFAULT_DIFF = 21.0

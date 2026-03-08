@@ -1,2 +1,2 @@
 NAME = "Schumann Resonance"
-FIXED_DIFF = 7.83
+DEFAULT_DIFF = 7.83
