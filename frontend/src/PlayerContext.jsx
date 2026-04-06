@@ -1,5 +1,6 @@
 // PlayerContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
+import BASE_URL from "./api.js";
 
 const PlayerContext = createContext();
 export const usePlayer = () => useContext(PlayerContext);
@@ -18,7 +19,7 @@ export function PlayerProvider({ children }) {
 // Load playlists from backend on login
   useEffect(() => {
     if (!USER_ID) return;
-    fetch(`http://localhost:8000/user_playlists/${USER_ID}`)
+    fetch(`${BASE_URL}/user_playlists/${USER_ID}`)
       .then(res => res.json())
       .then(data => {
         if (data && Object.keys(data).length > 0) setPlaylists(data);
@@ -29,7 +30,7 @@ export function PlayerProvider({ children }) {
   // Save playlists to backend whenever they change
   useEffect(() => {
     if (!USER_ID) return;
-    fetch(`http://localhost:8000/user_playlists/${USER_ID}`, {
+    fetch(`${BASE_URL}/user_playlists/${USER_ID}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(playlists),

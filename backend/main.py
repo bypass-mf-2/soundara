@@ -3,50 +3,147 @@ import soundfile as sf
 import librosa
 import shutil
 import os
+import sys
 import yt_dlp
 import re
 import json
 import requests
 import stripe
+import time
 
-from fastapi import FastAPI, UploadFile, File, Form, Request
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from typing import Optional
+from fastapi import FastAPI, UploadFile, File, Form, Request, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse
 from datetime import datetime
 from pydub import AudioSegment
 from fastapi import Query
-from backend.payment import calculate_price, MIN_PRICE_CENTS
-from backend.cyber_prevention import sanitize_filename, validate_file_extension, validate_file_size, validate_audio
 from dotenv import load_dotenv
 
-from backend import payment
-from backend.gamma import config as gamma
-from backend.alpha import config as alpha
-from backend.beta import config as beta
-from backend.theta import config as theta
-from backend.delta import config as delta
-from backend.schumann_resonance import config as schumann
+# Import payment module
+try:
+    from backend import payment
+    from backend.payment import calculate_price, MIN_PRICE_CENTS
+except ImportError:
+    import payment
+    from payment import calculate_price, MIN_PRICE_CENTS
+
+# Import wave configs
+try:
+    from backend.gamma import config as gamma
+    from backend.alpha import config as alpha
+    from backend.beta import config as beta
+    from backend.theta import config as theta
+    from backend.delta import config as delta
+    from backend.schumann_resonance import config as schumann
+except ImportError:
+    from gamma import config as gamma
+    from alpha import config as alpha
+    from beta import config as beta
+    from theta import config as theta
+    from delta import config as delta
+    from schumann_resonance import config as schumann
+
+# Import security modules
+try:
+    from backend.auth import (
+        verify_token, 
+        get_current_user_id, 
+        verify_admin,
+        create_access_token,
+        hash_password,
+        verify_password
+    )
+    from backend.cyber_prevention import (
+        sanitize_filename,
+        validate_file_extension,
+        validate_file_size,
+        validate_audio,
+        validate_user_id,
+        validate_track_name,
+        validate_email,
+        validate_youtube_url,
+        validate_mode
+    )
+    from backend.middleware.rate_limit import rate_limiter, apply_endpoint_limit
+    from backend.logging_config import (
+        logger,
+        log_security_event,
+        log_access,
+        log_error,
+        log_file_operation,
+        log_payment_event,
+        security_monitor
+    )
+    from backend.webhooks import handle_stripe_webhook
+except ImportError:
+    # Running from backend directory
+    from auth import (
+        verify_token, 
+        get_current_user_id, 
+        verify_admin,
+        create_access_token,
+        hash_password,
+        verify_password
+    )
+    from cyber_prevention import (
+        sanitize_filename,
+        validate_file_extension,
+        validate_file_size,
+        validate_audio,
+        validate_user_id,
+        validate_track_name,
+        validate_email,
+        validate_youtube_url,
+        validate_mode
+    )
+    from middleware.rate_limit import rate_limiter, apply_endpoint_limit
+    from logging_config import (
+        logger,
+        log_security_event,
+        log_access,
+        log_error,
+        log_file_operation,
+        log_payment_event,
+        security_monitor
+    )
+    from webhooks import handle_stripe_webhook
 
 # --------------------
 # Global files & folders
 # --------------------
 load_dotenv()
-LIBRARY_FILE = "music_library.json"
-LIBRARY_FOLDER = "music_library"
-TRACK_FILE = "track_event.json"
-USER_LIBRARY_FILE = "user_library.json"
-PLAYLISTS_FILE = "playlists.json"
+
+# Determine base directory
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if os.path.basename(os.getcwd()) == "backend":
+    BASE_DIR = os.path.dirname(os.getcwd())
+
+LIBRARY_FILE = os.path.join(BASE_DIR, "music_library.json")
+LIBRARY_FOLDER = os.path.join(BASE_DIR, "music_library")
+TRACK_FILE = os.path.join(BASE_DIR, "track_event.json")
+USER_LIBRARY_FILE = os.path.join(BASE_DIR, "user_library.json")
+PLAYLISTS_FILE = os.path.join(BASE_DIR, "playlists.json")
+SUBS_FILE = os.path.join(BASE_DIR, "user_subscriptions.json")
+FREE_USERS_FILE = os.path.join(BASE_DIR, "free_users.json")
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
+
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-SUBS_FILE = "user_subscriptions.json"
 MIN_PRICE_CENTS = 170
 
+# Create necessary directories
 os.makedirs(LIBRARY_FOLDER, exist_ok=True)
+os.makedirs(LOGS_DIR, exist_ok=True)
 
+# Initialize JSON files
 if not os.path.exists(PLAYLISTS_FILE):
     with open(PLAYLISTS_FILE, "w") as f:
         f.write("{}")
 
-# Ensure track_event.json exists
 if not os.path.exists(TRACK_FILE):
     with open(TRACK_FILE, "w") as f:
         f.write("[]")
@@ -55,35 +152,45 @@ if not os.path.exists(SUBS_FILE):
     with open(SUBS_FILE, "w") as f:
         f.write("{}")
 
-
 if not os.path.exists(USER_LIBRARY_FILE):
     with open(USER_LIBRARY_FILE, "w") as f:
         f.write("{}")
 
+if not os.path.exists(FREE_USERS_FILE):
+    with open(FREE_USERS_FILE, "w") as f:
+        json.dump([], f)
+
 # --------------------
 # FastAPI setup
 # --------------------
-app = FastAPI()
+app = FastAPI(title="Soundara API", version="1.0.0")
 
-origins = [
-    "http://localhost:5173",
-    "https://soundara.co"
-]
+# Load allowed origins from environment
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,https://soundara.co").split(",")
 
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-## call free users here
-with open("free_users.json", "r") as f:
-    FREE_USERS = json.load(f)
+# Trusted host middleware
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["soundara.co", "www.soundara.co", "localhost", "127.0.0.1", "*"]
+)
 
-with open("free_users.json", "w") as f:
-    json.dump(FREE_USERS, f)
+# Load free users
+try:
+    with open(FREE_USERS_FILE, "r") as f:
+        FREE_USERS = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    FREE_USERS = []
+    with open(FREE_USERS_FILE, "w") as f:
+        json.dump(FREE_USERS, f)
 
 # --------------------
 # Wave mode configs
@@ -98,29 +205,97 @@ WAVE_MODES = {
 }
 
 # --------------------
+# Middleware
+# --------------------
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Add security headers to all responses"""
+    response = await call_next(request)
+    
+    # Security headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    
+    # HTTPS enforcement in production
+    if os.getenv("ENVIRONMENT") == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    
+    # Content Security Policy
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://js.stripe.com; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self' https://api.stripe.com;"
+    )
+    
+    return response
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    """Apply rate limiting to all requests"""
+    start_time = time.time()
+    
+    try:
+        # Check rate limit
+        await rate_limiter.check_rate_limit(request)
+        
+        # Process request
+        response = await call_next(request)
+        
+        # Calculate response time
+        process_time = (time.time() - start_time) * 1000
+        
+        # Log access
+        log_access(
+            method=request.method,
+            endpoint=str(request.url.path),
+            ip_address=request.client.host if request.client else None,
+            status_code=response.status_code,
+            response_time_ms=process_time
+        )
+        
+        return response
+        
+    except HTTPException as e:
+        # Log rate limit exceeded
+        log_security_event(
+            event_type="rate_limit_exceeded",
+            severity="medium",
+            ip_address=request.client.host if request.client else None,
+            details={
+                "endpoint": str(request.url.path),
+                "method": request.method
+            }
+        )
+        raise
+
+
+# --------------------
 # DSP / Audio functions
 # --------------------
+
 def check_subscription(user_id: str):
     """
     Returns subscription info for a user:
     - None if no active subscription
     - dict with {'type': 'limited' or 'unlimited', 'remaining': int} if active
     """
-    # For simplicity, we store subscription status locally
-    # You can replace this with a proper DB or Stripe webhook handling
-    SUB_FILE = "user_subscriptions.json"
-    if not os.path.exists(SUB_FILE):
+    if not os.path.exists(SUBS_FILE):
         return None
 
-    with open(SUB_FILE, "r") as f:
+    with open(SUBS_FILE, "r") as f:
         subs = json.load(f)
 
     sub = subs.get(user_id)
     if not sub:
         return None
 
-    # Check if subscription is active (optional: check end date)
     return sub
+
 
 def make_binaural_from_file(path: str, freq_shift_hz: float):
     data, sr = sf.read(path)
@@ -136,15 +311,18 @@ def make_binaural_from_file(path: str, freq_shift_hz: float):
     stereo = np.column_stack([mono, shifted])
     return stereo, sr
 
+
 def create_preview(full_path, preview_path, seconds=7):
     audio = AudioSegment.from_file(full_path)
     preview = audio[:seconds * 1000]
     preview.export(preview_path, format="wav")
 
+
 def get_audio_file(track, user_has_paid):
     if track["is_binaural"] and not user_has_paid:
         return track["filename_preview"]
     return track["filename_full"]
+
 
 def add_to_library(track_name: str, full_path: str, mode: str, custom_freqs=None):
     """
@@ -200,6 +378,7 @@ def add_to_library(track_name: str, full_path: str, mode: str, custom_freqs=None
         "custom_freqs": custom_freqs
     }
 
+
 def download_youtube_audio(url: str, output_path: str):
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -209,7 +388,7 @@ def download_youtube_audio(url: str, output_path: str):
             'preferredcodec': 'wav',
             'preferredquality': '192',
         }],
-        'ffmpeg_location': r'C:\Users\trevo\Downloads\ffmpeg\bin'
+        'ffmpeg_location': os.getenv('FFMPEG_PATH', r'C:\Users\trevo\Downloads\ffmpeg\bin')
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -220,17 +399,42 @@ def download_youtube_audio(url: str, output_path: str):
     else:
         raise RuntimeError("Failed to download YouTube audio.")
 
+
 # --------------------
 # API Endpoints
 # --------------------
+
+@app.get("/")
+async def root():
+    """API root endpoint"""
+    return {
+        "name": "Soundara API",
+        "version": "1.0.0",
+        "status": "running"
+    }
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+
+
 @app.get("/user_playlists/{user_id}")
-def get_user_playlists(user_id: str):
+async def get_user_playlists(user_id: str):
+    """Get user's playlists"""
+    user_id = validate_user_id(user_id)
+    
     with open(PLAYLISTS_FILE, "r") as f:
         data = json.load(f)
     return data.get(user_id, {"default": []})
 
+
 @app.post("/user_playlists/{user_id}")
 async def save_user_playlists(user_id: str, request: Request):
+    """Save user's playlists"""
+    user_id = validate_user_id(user_id)
+    
     data = await request.json()
     with open(PLAYLISTS_FILE, "r") as f:
         all_playlists = json.load(f)
@@ -241,120 +445,132 @@ async def save_user_playlists(user_id: str, request: Request):
 
 
 @app.get("/library/")
-def get_library():
+async def get_library():
+    """Get public library of tracks"""
     try:
         with open(LIBRARY_FILE, "r") as f:
             return json.load(f)
     except:
         return []
 
-# Get a user's library
+
 @app.get("/user_library/{user_id}")
-def get_user_library(user_id: str):
+async def get_user_library(user_id: str):
+    """Get user's purchased library"""
+    user_id = validate_user_id(user_id)
+    
     with open(USER_LIBRARY_FILE, "r") as f:
         data = json.load(f)
     return data.get(user_id, [])
 
-# Add track to a user's library
+
 @app.post("/user_library/{user_id}/add")
 async def add_to_user_library(user_id: str, request: Request):
+    """Add track to user's library"""
+    user_id = validate_user_id(user_id)
+    
     data = await request.json()
+    
     with open(USER_LIBRARY_FILE, "r") as f:
-        library = json.load(f)
-    if user_id not in library:
-        library[user_id] = []
-    library[user_id].append(data)
+        library_data = json.load(f)
+    
+    if user_id not in library_data:
+        library_data[user_id] = []
+    
+    library_data[user_id].append(data)
+    
     with open(USER_LIBRARY_FILE, "w") as f:
-        json.dump(library, f, indent=2)
-    return {"status": "ok"}
-
-@app.post("/user_subscriptions/{user_id}/activate")
-async def activate_subscription(user_id: str, request: Request):
-    data = await request.json()
-    plan = data.get("plan")  # "limited" or "unlimited"
-    if plan not in ["limited", "unlimited"]:
-        return {"error": "Invalid plan"}
-
-    with open(SUBS_FILE, "r") as f:
-        subs = json.load(f)
-
-    # Activate subscription for user
-    subs[user_id] = {
-        "plan": plan,
-        "activated_at": datetime.now().isoformat(),
-        "tracks_used": 0  # for limited plan
-    }
-
-    with open(SUBS_FILE, "w") as f:
-        json.dump(subs, f, indent=2)
-
+        json.dump(library_data, f, indent=2)
+    
     return {"status": "ok"}
 
 @app.get("/library/file/{filename}")
-def get_library_file(filename: str):
+async def get_audio_file_endpoint(filename: str):
     path = os.path.join(LIBRARY_FOLDER, filename)
+
+    print("REQUESTED:", filename)
+    print("FULL PATH:", path)
+    print("EXISTS:", os.path.exists(path))
+
     if not os.path.exists(path):
-        return {"error": "File not found"}
+        raise HTTPException(status_code=404, detail="File not found")
+
     return FileResponse(path, media_type="audio/wav", filename=filename)
+
 
 @app.post("/process_audio/")
 async def process_audio(
-    file: UploadFile = File(None),
-    url: str = Form(None),
-    mode: str = Form("alpha"),
-    custom_freqs: str =Form(None),
-    track_name: str = Form(...)
+    request: Request,
+    file: Optional[UploadFile] = File(None),
+    url: Optional[str] = Form(None),
+    track_name: str = Form(...),
+    mode: str = Form(...),
 ):
-    user_freqs = None
-    if custom_freqs:
-        try:
-            user_freqs = json.loads(custom_freqs)  # e.g., {"alpha": 10, "beta": -5}
-        except json.JSONDecodeError:
-            return {"error": "custom_freqs must be valid JSON"}
+    if not file and not url:
+        return {"status": "error", "message": "No input provided"}
 
-    # Validate mode
-    if mode not in WAVE_MODES and not user_freqs:
-        return {"error": f"Invalid mode: {mode}. Must be one of {WAVE_MODES} or provide custom_freqs."}
 
+    """
+    Process audio file with binaural beats
+    """
+    client_ip = request.client.host if request.client else "unknown"
+    
+    # Apply endpoint-specific rate limit
+    await apply_endpoint_limit("/process_audio/", client_ip)
+    
+    # Validate inputs
+    track_name = validate_track_name(track_name)
+    mode = validate_mode(mode)
+    
     tmp_path = None
-
-    if mode not in WAVE_MODES:
-        return {"error": f"Invalid mode: {mode}. Must be one of {WAVE_MODES}"}
-
+    
     try:
-        # Save uploaded file or download from URL
+        # Handle file upload or YouTube URL
         if file:
-            tmp_path = f"temp_{datetime.now().timestamp()}_{sanitize_filename(file.filename)}"
-            with open(tmp_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
-
-            # Cybersecurity checks
-            if not validate_file_extension(tmp_path):
-                return {"error": "Invalid file type"}
-            if not validate_file_size(tmp_path):
-                return {"error": "File too large"}
-            if not validate_audio(tmp_path):
-                return {"error": "Invalid or corrupted audio"}
+            # Validate file
+            validate_file_extension(file.filename)
+            
+            # Save uploaded file temporarily
+            tmp_path = os.path.join(BASE_DIR, f"temp_{sanitize_filename(file.filename)}")
+            with open(tmp_path, "wb") as f:
+                content = await file.read()
+                f.write(content)
+            
+            # Validate file size and content
+            validate_file_size(tmp_path)
+            validate_audio(tmp_path)
+            
+            log_file_operation(
+                operation="upload",
+                filename=file.filename,
+                file_size_bytes=os.path.getsize(tmp_path),
+                success=True
+            )
+            
         elif url:
-            tmp_path = "temp_url_audio.wav"
-            if re.search(r"(youtube\.com|youtu\.be)", url):
+            # Validate YouTube URL
+            url = validate_youtube_url(url)
+
+            tmp_path = os.path.join(BASE_DIR, "temp_youtube.wav")
+            try:
                 download_youtube_audio(url, tmp_path)
-            else:
-                r = requests.get(url, stream=True)
-                if r.status_code != 200:
-                    return {"error": "Unable to download URL"}
-                with open(tmp_path, "wb") as f:
-                    for chunk in r.iter_content(1024):
-                        f.write(chunk)
+                validate_audio(tmp_path)
+            except Exception as e:
+                log_error(
+                    error_type="youtube_download_failed",
+                    error_message=str(e),
+                    endpoint="/process_audio/"
+                )
+                raise HTTPException(status_code=400, detail=f"YouTube download failed: {str(e)}")
         else:
-            return {"error": "No file or URL provided"}
+            raise HTTPException(status_code=400, detail="No file or URL provided")
 
         # Process binaural
         config = WAVE_MODES[mode] if mode in WAVE_MODES else None
         freq = getattr(config, "FIXED_DIFF", config.DEFAULT_DIFF) if config else 0
         output, sr = make_binaural_from_file(tmp_path, freq)
 
-        #Prepare safe filenames
+        # Prepare safe filenames
         safe_name = re.sub(r"[^\w\-]", "_", track_name)
         full_filename = f"processed_{safe_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}.wav"
         full_path = os.path.join(LIBRARY_FOLDER, full_filename)
@@ -363,7 +579,14 @@ async def process_audio(
         sf.write(full_path, output, sr)
 
         # Add to library (creates preview automatically)
-        stored_files = add_to_library(track_name, full_path, mode, custom_freqs=user_freqs)
+        stored_files = add_to_library(track_name, full_path, mode)
+        
+        log_file_operation(
+            operation="process",
+            filename=full_filename,
+            file_size_bytes=os.path.getsize(full_path),
+            success=True
+        )
 
         # Return exact filenames to frontend
         return {
@@ -372,31 +595,37 @@ async def process_audio(
             "mode": mode,
             "filename_full": stored_files["filename_full"],
             "filename_preview": stored_files["filename_preview"],
-            "size_bytes": os.path.getsize(full_path),
-            "custom_freqs": user_freqs or None
+            "size_bytes": os.path.getsize(full_path)
         }
 
+    except HTTPException:
+        raise
+    except Exception as e:
+        log_error(
+            error_type="processing_error",
+            error_message=str(e),
+            endpoint="/process_audio/"
+        )
+        raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+    
     finally:
         # Clean up temporary uploaded or downloaded file
         if tmp_path and os.path.exists(tmp_path):
             os.remove(tmp_path)
 
-# --------------------
-# Event tracking
-# --------------------
+
 @app.post("/track_event/")
 async def track_event(request: Request):
+    """Track user events"""
     data = await request.json()
     data["timestamp"] = datetime.now().isoformat()
 
-    # Log event to track_event.json
     with open(TRACK_FILE, "r") as f:
         events = json.load(f)
     events.append(data)
     with open(TRACK_FILE, "w") as f:
         json.dump(events, f, indent=2)
 
-    # If it's a track play, increment the play count in music_library.json
     if data.get("type") == "audio_play" and "track" in data:
         track_name = data["track"]
         if os.path.exists(LIBRARY_FILE):
@@ -411,30 +640,32 @@ async def track_event(request: Request):
 
     return {"status": "ok"}
 
+
 @app.post("/create_checkout_session/")
-async def create_checkout_session(data: dict):
+async def create_checkout_session(request: Request):
+    """Create Stripe checkout session"""
+    data = await request.json()
+    
     try:
-        print("Checkout request received:", data)
+        logger.info("Checkout request received")
 
         track = data.get("track")
         user_id = data.get("user_id")
         user_email = data.get("user_email")
-        print("LIBRARY_FOLDER:", LIBRARY_FOLDER)
-        print("Track object:", track)
-        print("filename_full:", track.get("filename_full"))
-        print("Files in LIBRARY_FOLDER:", os.listdir(LIBRARY_FOLDER))
 
         if not track:
-            return {"error": "Missing track data"}
+            raise HTTPException(status_code=400, detail="Missing track data")
 
         if not user_id:
-            return {"error": "User must be logged in"}
+            raise HTTPException(status_code=400, detail="User must be logged in")
+        
+        user_id = validate_user_id(user_id)
+        if user_email:
+            user_email = validate_email(user_email)
 
-        # -------------------------
         # Free user bypass
-        # -------------------------
         if user_email in FREE_USERS:
-            print("Free user detected:", user_email)
+            logger.info(f"Free user detected: {user_email}")
 
             with open(USER_LIBRARY_FILE, "r") as f:
                 library_data = json.load(f)
@@ -447,42 +678,29 @@ async def create_checkout_session(data: dict):
             with open(USER_LIBRARY_FILE, "w") as f:
                 json.dump(library_data, f, indent=2)
 
-            print("Track added to free user library:", track["name"])
-
             return {
                 "url": None,
                 "message": "Free user, track added to library",
                 "track": track["name"]
             }
 
-        # -------------------------
         # Paid checkout flow
-        # -------------------------
-        print("Incoming track:", track)
-
         filename = track.get("filename_full") or track.get("filename") or track.get("file_full")
         if not filename:
-            return {"error": "Missing filename in track data"}
+            raise HTTPException(status_code=400, detail="Missing filename in track data")
+        
         track_file_path = os.path.join(LIBRARY_FOLDER, filename)
 
-        print("LIBRARY_FOLDER:", LIBRARY_FOLDER)
-        print("filename:", filename)
-        print("full path:", track_file_path)
-        print("exists:", os.path.exists(track_file_path))
-
         if not os.path.exists(track_file_path):
-            return {"error": "Track file not found"}
+            raise HTTPException(status_code=400, detail="Track file not found")
 
         file_size_bytes = os.path.getsize(track_file_path)
-
         custom_mode = track.get("mode") not in WAVE_MODES
+        price_cents = payment.calculate_price(file_size_bytes, custom_mode=custom_mode)
 
-        price_cents = payment.calculate_price(
-            file_size_bytes,
-            custom_mode=custom_mode
-        )
+        logger.info(f"Calculated price (cents): {price_cents}")
 
-        print("Calculated price (cents):", price_cents)
+        base_url = "https://soundara.co" if os.getenv("ENVIRONMENT") == "production" else "http://localhost:5173"
 
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
@@ -497,33 +715,49 @@ async def create_checkout_session(data: dict):
                 "quantity": 1
             }],
             mode="payment",
-            success_url=f"http://localhost:5173/success?user={user_id}&track={filename}",
-            cancel_url="http://localhost:5173/",
+            success_url=f"{base_url}/success?user={user_id}&track={filename}",
+            cancel_url=f"{base_url}/",
+            metadata={
+                "user_id": user_id,
+                "track_name": track["name"]
+            }
         )
-
-        print("Stripe session created:", session.id)
 
         return {"url": session.url}
 
+    except HTTPException:
+        raise
     except Exception as e:
-        print("Error creating checkout session:", str(e))
-        return {"error": str(e)}
-    
+        log_error(
+            error_type="checkout_session_error",
+            error_message=str(e),
+            user_id=data.get("user_id"),
+            endpoint="/create_checkout_session/"
+        )
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/create_subscription_session/")
-async def create_subscription_session(data: dict):
+async def create_subscription_session(request: Request):
+    """Create subscription checkout session"""
+    data = await request.json()
+    
     user_id = data.get("user_id")
-    plan = data.get("plan")  # "limited" or "unlimited"
+    plan = data.get("plan")
 
     if not user_id or not plan:
-        return {"error": "Missing user_id or plan"}
+        raise HTTPException(status_code=400, detail="Missing user_id or plan")
+    
+    user_id = validate_user_id(user_id)
 
-    # Map plans to Stripe price IDs (create these in Stripe dashboard)
     PRICE_IDS = {
-        "limited": "price_123limited",   # $12.99 / month, 20 tracks
-        "unlimited": "price_456unlimited"  # $16.99 / month, unlimited
+        "limited": os.getenv("STRIPE_PRICE_LIMITED", "price_123limited"),
+        "unlimited": os.getenv("STRIPE_PRICE_UNLIMITED", "price_456unlimited")
     }
 
     try:
+        base_url = "https://soundara.co" if os.getenv("ENVIRONMENT") == "production" else "http://localhost:5173"
+        
         session = stripe.checkout.Session.create(
             mode="subscription",
             payment_method_types=["card"],
@@ -531,53 +765,65 @@ async def create_subscription_session(data: dict):
                 "price": PRICE_IDS[plan],
                 "quantity": 1
             }],
-            success_url=f"http://localhost:5173/success?user={user_id}&subscription={plan}",
-            cancel_url="http://localhost:5173/pricing"
+            success_url=f"{base_url}/success?user={user_id}&subscription={plan}",
+            cancel_url=f"{base_url}/pricing",
+            metadata={
+                "user_id": user_id,
+                "plan": plan
+            }
         )
         return {"url": session.url}
     except Exception as e:
-        print("Error creating subscription session:", e)
-        return {"error": str(e)}
-    
+        log_error(
+            error_type="subscription_session_error",
+            error_message=str(e),
+            user_id=user_id,
+            endpoint="/create_subscription_session/"
+        )
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/user_subscriptions/{user_id}/add")
 async def add_subscription(user_id: str, request: Request):
+    """Add/update user subscription"""
+    user_id = validate_user_id(user_id)
+    
     data = await request.json()
-    SUB_FILE = "user_subscriptions.json"
-    if os.path.exists(SUB_FILE):
-        with open(SUB_FILE, "r") as f:
+    if os.path.exists(SUBS_FILE):
+        with open(SUBS_FILE, "r") as f:
             subs = json.load(f)
     else:
         subs = {}
 
     subs[user_id] = data
 
-    with open(SUB_FILE, "w") as f:
+    with open(SUBS_FILE, "w") as f:
         json.dump(subs, f, indent=2)
 
     return {"status": "ok"}
 
+
 @app.get("/play/{track_name}")
-def play_track(track_name: str, user_id: str):
-    # Load library
+async def play_track(track_name: str, user_id: str):
+    """Play a track"""
+    track_name = validate_track_name(track_name)
+    user_id = validate_user_id(user_id)
+    
     with open(LIBRARY_FILE, "r") as f:
         library = json.load(f)
     
-    # Load user's library
     with open(USER_LIBRARY_FILE, "r") as f:
         user_library = json.load(f)
     user_tracks = user_library.get(user_id, [])
 
-    # Load user's subscription
     with open(SUBS_FILE, "r") as f:
         subs = json.load(f)
     user_sub = subs.get(user_id)
 
-    # Find track in main library
     track = next((t for t in library if t["name"] == track_name), None)
     if not track:
-        return {"error": "Track not found"}
+        raise HTTPException(status_code=404, detail="Track not found")
 
-    # Decide if user can access the full file
     has_paid = any(t.get("name") == track_name for t in user_tracks)
     is_subscribed = False
 
@@ -587,7 +833,6 @@ def play_track(track_name: str, user_id: str):
             is_subscribed = True
         elif plan == "limited" and user_sub["tracks_used"] < 20:
             is_subscribed = True
-            # Increment usage for limited plan
             user_sub["tracks_used"] += 1
             with open(SUBS_FILE, "w") as f:
                 json.dump(subs, f, indent=2)
@@ -596,6 +841,41 @@ def play_track(track_name: str, user_id: str):
     path = os.path.join(LIBRARY_FOLDER, filename)
 
     if not os.path.exists(path):
-        return {"error": "File not found"}
+        raise HTTPException(status_code=404, detail="File not found")
 
     return FileResponse(path, media_type="audio/wav", filename=filename)
+
+
+@app.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """Stripe webhook endpoint"""
+    return await handle_stripe_webhook(request)
+
+
+@app.get("/admin/stats")
+async def get_stats(admin_user = Depends(verify_admin)):
+    """Get platform statistics (admin only)"""
+    try:
+        with open(LIBRARY_FILE, "r") as f:
+            library = json.load(f)
+        
+        with open(USER_LIBRARY_FILE, "r") as f:
+            user_library = json.load(f)
+        
+        with open(TRACK_FILE, "r") as f:
+            events = json.load(f)
+        
+        total_plays = sum(track.get("plays", 0) for track in library)
+        total_users = len(user_library)
+        total_tracks = len(library)
+        
+        return {
+            "total_tracks": total_tracks,
+            "total_users": total_users,
+            "total_plays": total_plays,
+            "total_events": len(events)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+

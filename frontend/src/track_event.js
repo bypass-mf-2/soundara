@@ -1,6 +1,8 @@
+import BASE_URL from "./api.js";
+
 export async function trackEvent(event) {
   try {
-    const response = await fetch("http://localhost:8000/track_event/", {
+    const response = await fetch(`${BASE_URL}/track_event/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(event),

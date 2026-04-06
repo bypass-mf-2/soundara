@@ -1,0 +1,1271 @@
+indows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\trevo> ssh root@164.92.82.137
+Enter passphrase for key 'C:\Users\trevo/.ssh/id_ed25519':
+Welcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.8.0-71-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Sun Mar  8 19:05:51 UTC 2026
+
+  System load:  0.0               Processes:             120
+  Usage of /:   9.4% of 47.39GB   Users logged in:       1
+  Memory usage: 21%               IPv4 address for eth0: 164.92.82.137
+  Swap usage:   0%                IPv4 address for eth0: 10.48.0.6
+
+Expanded Security Maintenance for Applications is not enabled.
+
+0 updates can be applied immediately.
+
+12 additional security updates can be applied with ESM Apps.
+Learn more about enabling ESM Apps service at https://ubuntu.com/esm
+
+
+*** System restart required ***
+Last login: Sun Mar  8 18:38:53 2026 from 174.220.156.183
+root@Soundara:~# time dd if=/dev/zero of=test.wav bs=1M count=100 oflag=direct
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB, 100 MiB) copied, 0.202816 s, 517 MB/s
+
+real    0m0.207s
+user    0m0.000s
+sys     0m0.040s
+root@Soundara:~# time curl -X POST -F "file=@test.wav" http://localhost:8000/upload
+{"detail":"Not Found"}
+real    0m0.020s
+user    0m0.008s
+sys     0m0.007s
+root@Soundara:~# lscpu
+Architecture:             x86_64
+  CPU op-mode(s):         32-bit, 64-bit
+  Address sizes:          40 bits physical, 48 bits virtual
+  Byte Order:             Little Endian
+CPU(s):                   1
+  On-line CPU(s) list:    0
+Vendor ID:                GenuineIntel
+  BIOS Vendor ID:         QEMU
+  Model name:             DO-Regular
+    BIOS Model name:      pc-i440fx-6.1  CPU @ 2.0GHz
+    BIOS CPU family:      1
+    CPU family:           6
+    Model:                79
+    Thread(s) per core:   1
+    Core(s) per socket:   1
+    Socket(s):            1
+    Stepping:             1
+    BogoMIPS:             4589.21
+    Flags:                fpu vme de pse tsc msr pae mce cx8 apic sep
+                           mtrr pge mca cmov pat pse36 clflush mmx fx
+                          sr sse sse2 ss syscall nx rdtscp lm constan
+                          t_tsc rep_good nopl xtopology cpuid tsc_kno
+                          wn_freq pni pclmulqdq vmx ssse3 fma cx16 pc
+                          id sse4_1 sse4_2 x2apic movbe popcnt tsc_de
+                          adline_timer aes xsave avx f16c rdrand hype
+                          rvisor lahf_lm abm 3dnowprefetch cpuid_faul
+                          t pti ssbd ibrs ibpb tpr_shadow flexpriorit
+                          y ept vpid ept_ad fsgsbase tsc_adjust bmi1
+                          avx2 smep bmi2 erms invpcid rdseed adx smap
+                           xsaveopt arat vnmi md_clear
+Virtualization features:
+  Virtualization:         VT-x
+  Hypervisor vendor:      KVM
+  Virtualization type:    full
+Caches (sum of all):
+  L1d:                    32 KiB (1 instance)
+  L1i:                    32 KiB (1 instance)
+  L2:                     4 MiB (1 instance)
+NUMA:
+  NUMA node(s):           1
+  NUMA node0 CPU(s):      0
+Vulnerabilities:
+  Gather data sampling:   Not affected
+  Itlb multihit:          KVM: Mitigation: VMX disabled
+  L1tf:                   Mitigation; PTE Inversion; VMX conditional
+                          cache flushes, SMT disabled
+  Mds:                    Mitigation; Clear CPU buffers; SMT Host sta
+                          te unknown
+  Meltdown:               Mitigation; PTI
+  Mmio stale data:        Vulnerable: Clear CPU buffers attempted, no
+                           microcode; SMT Host state unknown
+  Reg file data sampling: Not affected
+  Retbleed:               Not affected
+  Spec rstack overflow:   Not affected
+  Spec store bypass:      Mitigation; Speculative Store Bypass disabl
+                          ed via prctl
+  Spectre v1:             Mitigation; usercopy/swapgs barriers and __
+                          user pointer sanitization
+  Spectre v2:             Mitigation; Retpolines; IBPB conditional; I
+                          BRS_FW; STIBP disabled; RSB filling; PBRSB-
+                          eIBRS Not affected; BHI Retpoline
+  Srbds:                  Not affected
+  Tsx async abort:        Not affected
+root@Soundara:~# grep "@app" main.py
+grep: main.py: No such file or directory
+root@Soundara:~# time curl -X POST -F "file=@test.wav" http://localhost:8000/process_audio
+
+real    0m0.032s
+user    0m0.006s
+sys     0m0.012s
+root@Soundara:~# root@Soundara:~# time curl -X POST -F "file=@test.wav" http://localhost:8000/process_audio
+^C
+root@Soundara:~# time curl -X POST \
+  -F "file=@test.wav" \
+  -F "track_name=test" \
+  http://localhost:8000/process_audio/
+{"error":"File too large"}
+real    0m1.227s
+user    0m0.042s
+sys     0m0.249s
+root@Soundara:~# dd if=/dev/zero of=small.wav bs=1M count=5
+5+0 records in
+5+0 records out
+5242880 bytes (5.2 MB, 5.0 MiB) copied, 0.0057221 s, 916 MB/s
+root@Soundara:~# time curl -X POST \
+  -F "file=@small.wav" \
+  -F "track_name=test" \
+  http://localhost:8000/process_audio/
+{"error":"Invalid or corrupted audio"}
+real    0m0.056s
+user    0m0.008s
+sys     0m0.012s
+root@Soundara:~# ffmpeg -f lavfi -i "sine=frequency=440:duration=10" test.wav
+ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
+  built with gcc 13 (Ubuntu 13.2.0-23ubuntu3)
+  configuration: --prefix=/usr --extra-version=3ubuntu5 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --disable-omx --enable-gnutls --enable-libaom --enable-libass --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libharfbuzz --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-openal --enable-opencl --enable-opengl --disable-sndio --enable-libvpl --disable-libmfx --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-ladspa --enable-libbluray --enable-libjack --enable-libpulse --enable-librabbitmq --enable-librist --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libx264 --enable-libzmq --enable-libzvbi --enable-lv2 --enable-sdl2 --enable-libplacebo --enable-librav1e --enable-pocketsphinx --enable-librsvg --enable-libjxl --enable-shared
+  libavutil      58. 29.100 / 58. 29.100
+  libavcodec     60. 31.102 / 60. 31.102
+  libavformat    60. 16.100 / 60. 16.100
+  libavdevice    60.  3.100 / 60.  3.100
+  libavfilter     9. 12.100 /  9. 12.100
+  libswscale      7.  5.100 /  7.  5.100
+  libswresample   4. 12.100 /  4. 12.100
+  libpostproc    57.  3.100 / 57.  3.100
+Input #0, lavfi, from 'sine=frequency=440:duration=10':
+  Duration: N/A, start: 0.000000, bitrate: 705 kb/s
+  Stream #0:0: Audio: pcm_s16le, 44100 Hz, mono, s16, 705 kb/s
+File 'test.wav' already exists. Overwrite? [y/N] y
+Stream mapping:
+  Stream #0:0 -> #0:0 (pcm_s16le (native) -> pcm_s16le (native))
+Press [q] to stop, [?] for help
+Output #0, wav, to 'test.wav':
+  Metadata:
+    ISFT            : Lavf60.16.100
+  Stream #0:0: Audio: pcm_s16le ([1][0][0][0] / 0x0001), 44100 Hz, mono, s16, 705 kb/s
+    Metadata:
+      encoder         : Lavc60.31.102 pcm_s16le
+[out#0/wav @ 0x581d3f7407c0] video:0kB audio:861kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.008844%
+size=     861kB time=00:00:09.98 bitrate= 706.8kbits/s speed= 193x   
+root@Soundara:~# time curl -X POST \
+  -F "file=@test.wav" \
+  -F "track_name=test" \
+  http://localhost:8000/process_audio/
+{"status":"success","track":"test","mode":"alpha","filename_full":"processed_test_20260308191552.wav","filename_preview":"preview_test_20260308191552.wav","size_bytes":1764044,"custom_freqs":null}
+real    0m40.795s
+user    0m0.011s
+sys     0m0.009s
+
+
+root@Soundara:~/soundara/backend# cat main.py
+import numpy as np
+import soundfile as sf
+import librosa
+import shutil
+import os
+import yt_dlp
+import re
+import json
+import requests
+import stripe
+
+from fastapi import FastAPI, UploadFile, File, Form, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from datetime import datetime
+from pydub import AudioSegment
+from fastapi import Query
+from backend.payment import calculate_price, MIN_PRICE_CENTS
+from backend.cyber_prevention import sanitize_filename, validate_file_extension, validate_file_size, validate_audio
+from dotenv import load_dotenv
+from pydub.utils import which
+
+from backend import payment
+from backend.gamma import config as gamma
+from backend.alpha import config as alpha
+from backend.beta import config as beta
+from backend.theta import config as theta
+from backend.delta import config as delta
+from backend.schumann_resonance import config as schumann
+
+# --------------------
+# Global files & folders
+# --------------------
+# Load environment variables
+load_dotenv()
+
+# Base folder of project (one level up from backend/)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Files
+LIBRARY_FILE = os.path.join(BASE_DIR, "music_library.json")
+LIBRARY_FOLDER = os.path.join(BASE_DIR, "music_library")
+TRACK_FILE = os.path.join(BASE_DIR, "track_event.json")
+USER_LIBRARY_FILE = os.path.join(BASE_DIR, "user_library.json")
+PLAYLISTS_FILE = os.path.join(BASE_DIR, "playlists.json")
+SUBS_FILE = os.path.join(BASE_DIR, "user_subscriptions.json")
+FREE_USERS = os.path.join(BASE_DIR, "backend", "free_users.json")
+# Stripe
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+MIN_PRICE_CENTS = 170
+
+AudioSegment.converter = which("ffmpeg")
+os.makedirs(LIBRARY_FOLDER, exist_ok=True)
+
+if not os.path.exists(PLAYLISTS_FILE):
+    with open(PLAYLISTS_FILE, "w") as f:
+        f.write("{}")
+
+# Ensure track_event.json exists
+if not os.path.exists(TRACK_FILE):
+    with open(TRACK_FILE, "w") as f:
+        f.write("[]")
+
+if not os.path.exists(SUBS_FILE):
+    with open(SUBS_FILE, "w") as f:
+        f.write("{}")
+
+
+if not os.path.exists(USER_LIBRARY_FILE):
+    with open(USER_LIBRARY_FILE, "w") as f:
+        f.write("{}")
+
+# --------------------
+# FastAPI setup
+# --------------------
+app = FastAPI()
+
+origins = [
+    "http://localhost:5173",
+    "https://soundara.co"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+## call free users here
+with open(FREE_USERS, "r") as f:
+    FREE_USERS = set(json.load(f))
+
+
+# --------------------
+# Wave mode configs
+# --------------------
+WAVE_MODES = {
+    "gamma": gamma,
+    "alpha": alpha,
+    "beta": beta,
+    "theta": theta,
+    "delta": delta,
+    "schumann": schumann,
+}
+
+# --------------------
+# DSP / Audio functions
+# --------------------
+def check_subscription(user_id: str):
+    """
+    Returns subscription info for a user:
+    - None if no active subscription
+    - dict with {'type': 'limited' or 'unlimited', 'remaining': int} if active
+    """
+    # For simplicity, we store subscription status locally
+    # You can replace this with a proper DB or Stripe webhook handling
+    SUB_FILE = "user_subscriptions.json"
+    if not os.path.exists(SUB_FILE):
+        return None
+
+    with open(SUB_FILE, "r") as f:
+        subs = json.load(f)
+
+    sub = subs.get(user_id)
+    if not sub:
+        return None
+
+    # Check if subscription is active (optional: check end date)
+    return sub
+
+def make_binaural_from_file(path: str, freq_shift_hz: float):
+    data, sr = sf.read(path)
+    if data.ndim == 2:
+        mono = np.mean(data, axis=1)
+    else:
+        mono = data
+    semitones = 12 * np.log2(1 + freq_shift_hz / sr)
+    shifted = librosa.effects.pitch_shift(y=mono, sr=sr, n_steps=semitones)
+    min_len = min(len(mono), len(shifted))
+    mono = mono[:min_len]
+    shifted = shifted[:min_len]
+    stereo = np.column_stack([mono, shifted])
+    return stereo, sr
+
+def create_preview(full_path, preview_path, seconds=7):
+    audio = AudioSegment.from_file(full_path)
+    preview = audio[:seconds * 1000]
+    preview.export(preview_path, format="wav")
+
+def get_audio_file(track, user_has_paid):
+    if track["is_binaural"] and not user_has_paid:
+        return track["filename_preview"]
+    return track["filename_full"]
+
+def add_to_library(track_name: str, full_path: str, mode: str, custom_freqs=None):
+    """
+    Stores a processed track in the library folder, generates a preview,
+    and saves metadata in LIBRARY_FILE.
+    Returns dict with filenames for frontend.
+    """
+    # Load existing library
+    if os.path.exists(LIBRARY_FILE):
+        with open(LIBRARY_FILE, "r") as f:
+            library = json.load(f)
+    else:
+        library = []
+
+    # Safe track name for filenames
+    safe_name = re.sub(r"[^\w\-]", "_", track_name)
+    timestamp_str = datetime.now().strftime('%Y%m%d%H%M%S')
+
+    # Preview filename
+    preview_filename = f"preview_{safe_name}_{timestamp_str}.wav"
+    preview_path = os.path.join(LIBRARY_FOLDER, preview_filename)
+
+    # Generate 7-second preview
+    create_preview(full_path, preview_path, seconds=7)
+
+    # Move full file into library folder (if not already there)
+    final_full_path = os.path.join(LIBRARY_FOLDER, os.path.basename(full_path))
+    if os.path.abspath(full_path) != os.path.abspath(final_full_path):
+        shutil.move(full_path, final_full_path)
+
+    # Save entry in library.json
+    library_entry = {
+        "name": track_name,
+        "filename_full": os.path.basename(final_full_path),
+        "filename_preview": preview_filename,
+        "mode": mode,
+        "is_binaural": True,
+        "custom_freqs": custom_freqs,
+        "size_bytes": os.path.getsize(final_full_path),
+        "timestamp": datetime.now().isoformat(),
+        "plays": 0
+    }
+    library.append(library_entry)
+
+    with open(LIBRARY_FILE, "w") as f:
+        json.dump(library, f, indent=2)
+
+    # Return info needed for frontend immediately
+    return {
+        "filename_full": os.path.basename(final_full_path),
+        "filename_preview": preview_filename,
+        "size_bytes": library_entry["size_bytes"],
+        "custom_freqs": custom_freqs
+    }
+
+def download_youtube_audio(url: str, output_path: str):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': 'temp_audio.%(ext)s',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'wav',
+            'preferredquality': '192',
+        }],
+        'ffmpeg_location': r'C:\Users\trevo\Downloads\ffmpeg\bin'
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
+    if os.path.exists('temp_audio.wav'):
+        os.rename('temp_audio.wav', output_path)
+    else:
+        raise RuntimeError("Failed to download YouTube audio.")
+
+# --------------------
+# API Endpoints
+# --------------------
+@app.get("/user_playlists/{user_id}")
+def get_user_playlists(user_id: str):
+    with open(PLAYLISTS_FILE, "r") as f:
+        data = json.load(f)
+    return data.get(user_id, {"default": []})
+
+@app.post("/user_playlists/{user_id}")
+async def save_user_playlists(user_id: str, request: Request):
+    data = await request.json()
+    with open(PLAYLISTS_FILE, "r") as f:
+        all_playlists = json.load(f)
+    all_playlists[user_id] = data
+    with open(PLAYLISTS_FILE, "w") as f:
+        json.dump(all_playlists, f, indent=2)
+    return {"status": "ok"}
+
+
+@app.get("/library/")
+def get_library():
+    try:
+        with open(LIBRARY_FILE, "r") as f:
+            return json.load(f)
+    except:
+        return []
+
+# Get a user's library
+@app.get("/user_library/{user_id}")
+def get_user_library(user_id: str):
+    with open(USER_LIBRARY_FILE, "r") as f:
+        data = json.load(f)
+    return data.get(user_id, [])
+
+# Add track to a user's library
+@app.post("/user_library/{user_id}/add")
+async def add_to_user_library(user_id: str, request: Request):
+    data = await request.json()
+    with open(USER_LIBRARY_FILE, "r") as f:
+        library = json.load(f)
+    if user_id not in library:
+        library[user_id] = []
+    library[user_id].append(data)
+    with open(USER_LIBRARY_FILE, "w") as f:
+        json.dump(library, f, indent=2)
+    return {"status": "ok"}
+
+@app.post("/user_subscriptions/{user_id}/activate")
+async def activate_subscription(user_id: str, request: Request):
+    data = await request.json()
+    plan = data.get("plan")  # "limited" or "unlimited"
+    if plan not in ["limited", "unlimited"]:
+        return {"error": "Invalid plan"}
+
+    with open(SUBS_FILE, "r") as f:
+        subs = json.load(f)
+
+    # Activate subscription for user
+    subs[user_id] = {
+        "plan": plan,
+        "activated_at": datetime.now().isoformat(),
+        "tracks_used": 0  # for limited plan
+    }
+
+    with open(SUBS_FILE, "w") as f:
+        json.dump(subs, f, indent=2)
+
+    return {"status": "ok"}
+
+@app.get("/library/file/{filename}")
+def get_library_file(filename: str):
+    path = os.path.join(LIBRARY_FOLDER, filename)
+    if not os.path.exists(path):
+        return {"error": "File not found"}
+    return FileResponse(path, media_type="audio/wav", filename=filename)
+
+@app.post("/process_audio/")
+async def process_audio(
+    file: UploadFile = File(None),
+    url: str = Form(None),
+    mode: str = Form("alpha"),
+    custom_freqs: str =Form(None),
+    track_name: str = Form(...)
+):
+    user_freqs = None
+    if custom_freqs:
+        try:
+            user_freqs = json.loads(custom_freqs)  # e.g., {"alpha": 10, "beta": -5}
+        except json.JSONDecodeError:
+            return {"error": "custom_freqs must be valid JSON"}
+
+    # Validate mode
+    if mode not in WAVE_MODES and not user_freqs:
+        return {"error": f"Invalid mode: {mode}. Must be one of {WAVE_MODES} or provide custom_freqs."}
+
+    tmp_path = None
+
+    if mode not in WAVE_MODES:
+        return {"error": f"Invalid mode: {mode}. Must be one of {WAVE_MODES}"}
+
+    try:
+        # Save uploaded file or download from URL
+        if file:
+            tmp_path = f"temp_{datetime.now().timestamp()}_{sanitize_filename(file.filename)}"
+            with open(tmp_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+
+            # Cybersecurity checks
+            if not validate_file_extension(tmp_path):
+                return {"error": "Invalid file type"}
+            if not validate_file_size(tmp_path):
+                return {"error": "File too large"}
+            if not validate_audio(tmp_path):
+                return {"error": "Invalid or corrupted audio"}
+        elif url:
+            tmp_path = "temp_url_audio.wav"
+            if re.search(r"(youtube\.com|youtu\.be)", url):
+                download_youtube_audio(url, tmp_path)
+            else:
+                r = requests.get(url, stream=True)
+                if r.status_code != 200:
+                    return {"error": "Unable to download URL"}
+                with open(tmp_path, "wb") as f:
+                    for chunk in r.iter_content(1024):
+                        f.write(chunk)
+        else:
+            return {"error": "No file or URL provided"}
+
+        # Process binaural
+        config = WAVE_MODES[mode] if mode in WAVE_MODES else None
+        freq = getattr(config, "FIXED_DIFF", config.DEFAULT_DIFF) if config else 0
+        output, sr = make_binaural_from_file(tmp_path, freq)
+
+        #Prepare safe filenames
+        safe_name = re.sub(r"[^\w\-]", "_", track_name)
+        full_filename = f"processed_{safe_name}_{datetime.now().strftime('%Y%m%d%H%M%S')}.wav"
+        full_path = os.path.join(LIBRARY_FOLDER, full_filename)
+
+        # Save full processed file
+        sf.write(full_path, output, sr)
+
+        # Add to library (creates preview automatically)
+        stored_files = add_to_library(track_name, full_path, mode, custom_freqs=user_freqs)
+
+        # Return exact filenames to frontend
+        return {
+            "status": "success",
+            "track": track_name,
+            "mode": mode,
+            "filename_full": stored_files["filename_full"],
+            "filename_preview": stored_files["filename_preview"],
+            "size_bytes": os.path.getsize(full_path),
+            "custom_freqs": user_freqs or None
+        }
+
+    finally:
+        # Clean up temporary uploaded or downloaded file
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+# --------------------
+# Event tracking
+# --------------------
+@app.post("/track_event/")
+async def track_event(request: Request):
+    data = await request.json()
+    data["timestamp"] = datetime.now().isoformat()
+
+    # Log event to track_event.json
+    with open(TRACK_FILE, "r") as f:
+        events = json.load(f)
+    events.append(data)
+    with open(TRACK_FILE, "w") as f:
+        json.dump(events, f, indent=2)
+
+    # If it's a track play, increment the play count in music_library.json
+    if data.get("type") == "audio_play" and "track" in data:
+        track_name = data["track"]
+        if os.path.exists(LIBRARY_FILE):
+            with open(LIBRARY_FILE, "r") as f:
+                library = json.load(f)
+            for track in library:
+                if track["name"] == track_name:
+                    track["plays"] += 1
+                    break
+            with open(LIBRARY_FILE, "w") as f:
+                json.dump(library, f, indent=2)
+
+    return {"status": "ok"}
+
+@app.post("/create_checkout_session/")
+async def create_checkout_session(data: dict):
+    try:
+        print("Checkout request received:", data)
+
+        track = data.get("track")
+        user_id = data.get("user_id")
+        user_email = data.get("user_email")
+        print("LIBRARY_FOLDER:", LIBRARY_FOLDER)
+        print("Track object:", track)
+        print("filename_full:", track.get("filename_full"))
+        print("Files in LIBRARY_FOLDER:", os.listdir(LIBRARY_FOLDER))
+
+        if not track:
+            return {"error": "Missing track data"}
+
+        if not user_id:
+            return {"error": "User must be logged in"}
+
+        # -------------------------
+        # Free user bypass
+        # -------------------------
+        if user_email in FREE_USERS:
+            print("Free user detected:", user_email)
+
+            with open(USER_LIBRARY_FILE, "r") as f:
+                library_data = json.load(f)
+
+            if user_id not in library_data:
+                library_data[user_id] = []
+
+            library_data[user_id].append(track)
+
+            with open(USER_LIBRARY_FILE, "w") as f:
+                json.dump(library_data, f, indent=2)
+
+            print("Track added to free user library:", track["name"])
+
+            return {
+                "url": None,
+                "message": "Free user, track added to library",
+                "track": track["name"]
+            }
+
+        # -------------------------
+        # Paid checkout flow
+        # -------------------------
+        print("Incoming track:", track)
+
+        filename = track.get("filename_full") or track.get("filename") or track.get("file_full")
+        if not filename:
+            return {"error": "Missing filename in track data"}
+        track_file_path = os.path.join(LIBRARY_FOLDER, filename)
+
+        print("LIBRARY_FOLDER:", LIBRARY_FOLDER)
+        print("filename:", filename)
+        print("full path:", track_file_path)
+        print("exists:", os.path.exists(track_file_path))
+
+        if not os.path.exists(track_file_path):
+            return {"error": "Track file not found"}
+
+        file_size_bytes = os.path.getsize(track_file_path)
+
+        custom_mode = track.get("mode") not in WAVE_MODES
+
+        price_cents = payment.calculate_price(
+            file_size_bytes,
+            custom_mode=custom_mode
+        )
+
+        print("Calculated price (cents):", price_cents)
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": track["name"]
+                    },
+                    "unit_amount": price_cents
+                },
+                "quantity": 1
+            }],
+            mode="payment",
+            success_url=f"http://localhost:5173/success?user={user_id}&track={filename}",
+            cancel_url="http://localhost:5173/",
+        )
+
+        print("Stripe session created:", session.id)
+
+        return {"url": session.url}
+
+    except Exception as e:
+        print("Error creating checkout session:", str(e))
+        return {"error": str(e)}
+
+@app.post("/create_subscription_session/")
+async def create_subscription_session(data: dict):
+    user_id = data.get("user_id")
+    plan = data.get("plan")  # "limited" or "unlimited"
+
+    if not user_id or not plan:
+        return {"error": "Missing user_id or plan"}
+
+    # Map plans to Stripe price IDs (create these in Stripe dashboard)
+    PRICE_IDS = {
+        "limited": "price_123limited",   # $12.99 / month, 20 tracks
+        "unlimited": "price_456unlimited"  # $16.99 / month, unlimited
+    }
+
+    try:
+        session = stripe.checkout.Session.create(
+            mode="subscription",
+            payment_method_types=["card"],
+            line_items=[{
+                "price": PRICE_IDS[plan],
+                "quantity": 1
+            }],
+            success_url=f"http://localhost:5173/success?user={user_id}&subscription={plan}",
+            cancel_url="http://localhost:5173/pricing"
+        )
+        return {"url": session.url}
+    except Exception as e:
+        print("Error creating subscription session:", e)
+        return {"error": str(e)}
+
+@app.post("/user_subscriptions/{user_id}/add")
+async def add_subscription(user_id: str, request: Request):
+    data = await request.json()
+    SUB_FILE = "user_subscriptions.json"
+    if os.path.exists(SUB_FILE):
+        with open(SUB_FILE, "r") as f:
+            subs = json.load(f)
+    else:
+        subs = {}
+
+    subs[user_id] = data
+
+    with open(SUB_FILE, "w") as f:
+        json.dump(subs, f, indent=2)
+
+    return {"status": "ok"}
+
+@app.get("/play/{track_name}")
+def play_track(track_name: str, user_id: str):
+    # Load library
+    with open(LIBRARY_FILE, "r") as f:
+        library = json.load(f)
+
+    # Load user's library
+    with open(USER_LIBRARY_FILE, "r") as f:
+        user_library = json.load(f)
+    user_tracks = user_library.get(user_id, [])
+
+    # Load user's subscription
+    with open(SUBS_FILE, "r") as f:
+        subs = json.load(f)
+    user_sub = subs.get(user_id)
+
+    # Find track in main library
+    track = next((t for t in library if t["name"] == track_name), None)
+    if not track:
+        return {"error": "Track not found"}
+
+    # Decide if user can access the full file
+    has_paid = any(t.get("name") == track_name for t in user_tracks)
+    is_subscribed = False
+
+    if user_sub:
+        plan = user_sub["plan"]
+        if plan == "unlimited":
+            is_subscribed = True
+        elif plan == "limited" and user_sub["tracks_used"] < 20:
+            is_subscribed = True
+            # Increment usage for limited plan
+            user_sub["tracks_used"] += 1
+            with open(SUBS_FILE, "w") as f:
+                json.dump(subs, f, indent=2)
+
+    filename = get_audio_file(track, has_paid or is_subscribed)
+    path = os.path.join(LIBRARY_FOLDER, filename)
+
+    if not os.path.exists(path):
+        return {"error": "File not found"}
+
+    return FileResponse(path, media_type="audio/wav", filename=filename)
+root@Soundara:~/soundara/backend# nano main.py
+root@Soundara:~/soundara/backend# pkill -f "uvicorn main:app"  # stop the old process
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+INFO:     Will watch for changes in these directories: ['/root/soundara/backend']
+ERROR:    [Errno 98] Address already in use
+root@Soundara:~/soundara/backend# sudo systemctl restart soundara
+root@Soundara:~/soundara/backend# ls -lh music/library
+ls: cannot access 'music/library': No such file or directory
+root@Soundara:~/soundara/backend# ls
+__init__.py          free_users.json     survey.py
+__pycache__          gamma               test.wav
+alpha                main.py             theta
+beta                 payment.py          track_event.json
+cyber_prevention.py  schumann_resonance  user_library.json
+delta                server.js           venv
+root@Soundara:~/soundara/backend# cat user_libary.json
+cat: user_libary.json: No such file or directory
+root@Soundara:~/soundara/backend# cat user_library.json
+{
+  "user1": [
+    { "track": "Ocean Waves", "file": "ocean_waves.wav", "mode": "alpha", "purchased": true },
+    { "track": "Deep Focus", "file": "deep_focus.wav", "mode": "beta", "purchased": true }
+  ]
+}root@Soundara:~/soundara/backend# cd ~/soundara
+root@Soundara:~/soundara# ls
+ backend
+ frontend
+ music_library
+ music_library.json
+ playlists.json
+'processed_Perrie_-_Die_With_A_Smile_Bruno_Mars_Lady_Gaga_Cover_-_Live_Lounge_(mp3.pm).mp3'
+ requirements.txt
+ track_event.json
+ user_library.json
+ user_subscriptions.json
+ uvicorn.log
+root@Soundara:~/soundara# ls -lh music_library
+total 2.9M
+-rw-r--r-- 1 root root 1.2M Mar  8 19:15 preview_test_20260308191552.wav
+-rw-r--r-- 1 root root 1.7M Mar  8 19:15 processed_test_20260308191552.wav
+root@Soundara:~/soundara# cat music_library.json
+[
+  {
+    "name": "die with a smile",
+    "filename_full": "processed_die_with_a_smile_20260307185017.wav",
+    "filename_preview": "preview_die_with_a_smile_20260307185017.wav",
+    "mode": "alpha",
+    "is_binaural": true,
+    "custom_freqs": null,
+    "size_bytes": 46902760,
+    "timestamp": "2026-03-07T18:50:17.388931",
+    "plays": 0
+  },
+  {
+    "name": "test",
+    "filename_full": "processed_test_20260308191552.wav",
+    "filename_preview": "preview_test_20260308191552.wav",
+    "mode": "alpha",
+    "is_binaural": true,
+    "custom_freqs": null,
+    "size_bytes": 1764044,
+    "timestamp": "2026-03-08T19:15:52.248616",
+    "plays": 0
+  }
+]root@Soundara:~/soundara# GET http://<your-server>/library/file/processed_test_20260308191552.wav
+-bash: your-server: No such file or directory
+root@Soundara:~/soundara# GET http://soundara.co/library/file/process
+ed_test_20260308191552.wav
+Command 'GET' not found, but can be installed with:
+apt install libwww-perl
+root@Soundara:~/soundara# apt install libwww-perl
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  libauthen-sasl-perl libclone-perl libdata-dump-perl
+  libencode-locale-perl libfile-listing-perl libfont-afm-perl
+  libhtml-form-perl libhtml-format-perl libhtml-parser-perl
+  libhtml-tagset-perl libhtml-tree-perl libhttp-cookies-perl
+  libhttp-daemon-perl libhttp-date-perl libhttp-message-perl
+  libhttp-negotiate-perl libio-html-perl libio-socket-ssl-perl
+  liblwp-mediatypes-perl liblwp-protocol-https-perl
+  libmailtools-perl libnet-http-perl libnet-smtp-ssl-perl
+  libnet-ssleay-perl libtimedate-perl libtry-tiny-perl liburi-perl
+  libwww-robotrules-perl perl-openssl-defaults
+Suggested packages:
+  libdigest-hmac-perl libgssapi-perl libio-compress-brotli-perl
+  libcrypt-ssleay-perl libsub-name-perl libbusiness-isbn-perl
+  libregexp-ipv6-perl libauthen-ntlm-perl debhelper
+The following NEW packages will be installed:
+  libauthen-sasl-perl libclone-perl libdata-dump-perl
+  libencode-locale-perl libfile-listing-perl libfont-afm-perl
+  libhtml-form-perl libhtml-format-perl libhtml-parser-perl
+  libhtml-tagset-perl libhtml-tree-perl libhttp-cookies-perl
+  libhttp-daemon-perl libhttp-date-perl libhttp-message-perl
+  libhttp-negotiate-perl libio-html-perl libio-socket-ssl-perl
+  liblwp-mediatypes-perl liblwp-protocol-https-perl
+  libmailtools-perl libnet-http-perl libnet-smtp-ssl-perl
+  libnet-ssleay-perl libtimedate-perl libtry-tiny-perl liburi-perl
+  libwww-perl libwww-robotrules-perl perl-openssl-defaults
+0 upgraded, 30 newly installed, 0 to remove and 0 not upgraded.
+Need to get 1588 kB of archives.
+After this operation, 5006 kB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libclone-perl amd64 0.46-1build3 [10.7 kB]
+Get:2 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libdata-dump-perl all 1.25-1 [25.9 kB]
+Get:3 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libencode-locale-perl all 1.05-3 [11.6 kB]
+Get:4 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libtimedate-perl all 2.3300-2 [34.0 kB]
+Get:5 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libhttp-date-perl all 6.06-1 [10.2 kB]
+Get:6 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libfile-listing-perl all 6.16-1 [11.3 kB]
+Get:7 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libfont-afm-perl all 1.20-4 [13.0 kB]
+Get:8 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libhtml-tagset-perl all 3.20-6 [11.3 kB]
+Get:9 http://mirrors.digitalocean.com/ubuntu noble/main amd64 liburi-perl all 5.27-1 [88.0 kB]
+Get:10 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libhtml-parser-perl amd64 3.81-1build3 [85.8 kB]
+Get:11 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libio-html-perl all 1.004-3 [15.9 kB]
+Get:12 http://mirrors.digitalocean.com/ubuntu noble/main amd64 liblwp-mediatypes-perl all 6.04-2 [20.1 kB]
+Get:13 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libhttp-message-perl all 6.45-1ubuntu1 [78.2 kB]
+Get:14 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libhtml-form-perl all 6.11-1 [32.1 kB]
+Get:15 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libhtml-tree-perl all 5.07-3 [200 kB]
+Get:16 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libhtml-format-perl all 2.16-2 [36.9 kB]
+Get:17 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libhttp-cookies-perl all 6.11-1 [18.2 kB]
+Get:18 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libhttp-daemon-perl all 6.16-1 [22.4 kB]
+Get:19 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libhttp-negotiate-perl all 6.01-2 [12.4 kB]
+Get:20 http://mirrors.digitalocean.com/ubuntu noble/main amd64 perl-openssl-defaults amd64 7build3 [6626 B]
+Get:21 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libnet-ssleay-perl amd64 1.94-1build4 [316 kB]
+Get:22 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libio-socket-ssl-perl all 2.085-1 [195 kB]
+Get:23 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libnet-http-perl all 6.23-1 [22.3 kB]
+Get:24 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libtry-tiny-perl all 0.31-2 [20.8 kB]
+Get:25 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libwww-robotrules-perl all 6.02-1 [12.6 kB]
+Get:26 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libwww-perl all 6.76-1 [138 kB]
+Get:27 http://mirrors.digitalocean.com/ubuntu noble/main amd64 liblwp-protocol-https-perl all 6.13-1 [9006 B]
+Get:28 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libnet-smtp-ssl-perl all 1.04-2 [6218 B]
+Get:29 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libmailtools-perl all 2.21-2 [80.4 kB]
+Get:30 http://mirrors.digitalocean.com/ubuntu noble/main amd64 libauthen-sasl-perl all 2.1700-1 [42.9 kB]
+Fetched 1588 kB in 7s (239 kB/s)
+Selecting previously unselected package libclone-perl:amd64.
+(Reading database ... 132819 files and directories currently installed.)
+Preparing to unpack .../00-libclone-perl_0.46-1build3_amd64.deb ...
+Unpacking libclone-perl:amd64 (0.46-1build3) ...
+Selecting previously unselected package libdata-dump-perl.
+Preparing to unpack .../01-libdata-dump-perl_1.25-1_all.deb ...
+Unpacking libdata-dump-perl (1.25-1) ...
+Selecting previously unselected package libencode-locale-perl.
+Preparing to unpack .../02-libencode-locale-perl_1.05-3_all.deb ...
+Unpacking libencode-locale-perl (1.05-3) ...
+Selecting previously unselected package libtimedate-perl.
+Preparing to unpack .../03-libtimedate-perl_2.3300-2_all.deb ...
+Unpacking libtimedate-perl (2.3300-2) ...
+Selecting previously unselected package libhttp-date-perl.
+Preparing to unpack .../04-libhttp-date-perl_6.06-1_all.deb ...
+Unpacking libhttp-date-perl (6.06-1) ...
+Selecting previously unselected package libfile-listing-perl.
+Preparing to unpack .../05-libfile-listing-perl_6.16-1_all.deb ...
+Unpacking libfile-listing-perl (6.16-1) ...
+Selecting previously unselected package libfont-afm-perl.
+Preparing to unpack .../06-libfont-afm-perl_1.20-4_all.deb ...
+Unpacking libfont-afm-perl (1.20-4) ...
+Selecting previously unselected package libhtml-tagset-perl.
+Preparing to unpack .../07-libhtml-tagset-perl_3.20-6_all.deb ...
+Unpacking libhtml-tagset-perl (3.20-6) ...
+Selecting previously unselected package liburi-perl.
+Preparing to unpack .../08-liburi-perl_5.27-1_all.deb ...
+Unpacking liburi-perl (5.27-1) ...
+Selecting previously unselected package libhtml-parser-perl:amd64.
+Preparing to unpack .../09-libhtml-parser-perl_3.81-1build3_amd64.deb ...
+Unpacking libhtml-parser-perl:amd64 (3.81-1build3) ...
+Selecting previously unselected package libio-html-perl.
+Preparing to unpack .../10-libio-html-perl_1.004-3_all.deb ...
+Unpacking libio-html-perl (1.004-3) ...
+Selecting previously unselected package liblwp-mediatypes-perl.
+Preparing to unpack .../11-liblwp-mediatypes-perl_6.04-2_all.deb ...
+Unpacking liblwp-mediatypes-perl (6.04-2) ...
+Selecting previously unselected package libhttp-message-perl.
+Preparing to unpack .../12-libhttp-message-perl_6.45-1ubuntu1_all.deb ...
+Unpacking libhttp-message-perl (6.45-1ubuntu1) ...
+Selecting previously unselected package libhtml-form-perl.
+Preparing to unpack .../13-libhtml-form-perl_6.11-1_all.deb ...
+Unpacking libhtml-form-perl (6.11-1) ...
+Selecting previously unselected package libhtml-tree-perl.
+Preparing to unpack .../14-libhtml-tree-perl_5.07-3_all.deb ...
+Unpacking libhtml-tree-perl (5.07-3) ...
+Selecting previously unselected package libhtml-format-perl.
+Preparing to unpack .../15-libhtml-format-perl_2.16-2_all.deb ...
+Unpacking libhtml-format-perl (2.16-2) ...
+Selecting previously unselected package libhttp-cookies-perl.
+Preparing to unpack .../16-libhttp-cookies-perl_6.11-1_all.deb ...
+Unpacking libhttp-cookies-perl (6.11-1) ...
+Selecting previously unselected package libhttp-daemon-perl.
+Preparing to unpack .../17-libhttp-daemon-perl_6.16-1_all.deb ...
+Unpacking libhttp-daemon-perl (6.16-1) ...
+Selecting previously unselected package libhttp-negotiate-perl.
+Preparing to unpack .../18-libhttp-negotiate-perl_6.01-2_all.deb ...
+Unpacking libhttp-negotiate-perl (6.01-2) ...
+Selecting previously unselected package perl-openssl-defaults:amd64.
+Preparing to unpack .../19-perl-openssl-defaults_7build3_amd64.deb ...
+Unpacking perl-openssl-defaults:amd64 (7build3) ...
+Selecting previously unselected package libnet-ssleay-perl:amd64.
+Preparing to unpack .../20-libnet-ssleay-perl_1.94-1build4_amd64.deb ...
+Unpacking libnet-ssleay-perl:amd64 (1.94-1build4) ...
+Selecting previously unselected package libio-socket-ssl-perl.
+Preparing to unpack .../21-libio-socket-ssl-perl_2.085-1_all.deb ...
+Unpacking libio-socket-ssl-perl (2.085-1) ...
+Selecting previously unselected package libnet-http-perl.
+Preparing to unpack .../22-libnet-http-perl_6.23-1_all.deb ...
+Unpacking libnet-http-perl (6.23-1) ...
+Selecting previously unselected package libtry-tiny-perl.
+Preparing to unpack .../23-libtry-tiny-perl_0.31-2_all.deb ...
+Unpacking libtry-tiny-perl (0.31-2) ...
+Selecting previously unselected package libwww-robotrules-perl.
+Preparing to unpack .../24-libwww-robotrules-perl_6.02-1_all.deb ...
+Unpacking libwww-robotrules-perl (6.02-1) ...
+Selecting previously unselected package libwww-perl.
+Preparing to unpack .../25-libwww-perl_6.76-1_all.deb ...
+Unpacking libwww-perl (6.76-1) ...
+Selecting previously unselected package liblwp-protocol-https-perl.
+Preparing to unpack .../26-liblwp-protocol-https-perl_6.13-1_all.deb ...
+Unpacking liblwp-protocol-https-perl (6.13-1) ...
+Selecting previously unselected package libnet-smtp-ssl-perl.
+Preparing to unpack .../27-libnet-smtp-ssl-perl_1.04-2_all.deb ...
+Unpacking libnet-smtp-ssl-perl (1.04-2) ...
+Selecting previously unselected package libmailtools-perl.
+Preparing to unpack .../28-libmailtools-perl_2.21-2_all.deb ...
+Unpacking libmailtools-perl (2.21-2) ...
+Selecting previously unselected package libauthen-sasl-perl.
+Preparing to unpack .../29-libauthen-sasl-perl_2.1700-1_all.deb ...
+Unpacking libauthen-sasl-perl (2.1700-1) ...
+Setting up libfont-afm-perl (1.20-4) ...
+Setting up libclone-perl:amd64 (0.46-1build3) ...
+Setting up libhtml-tagset-perl (3.20-6) ...
+Setting up libauthen-sasl-perl (2.1700-1) ...
+Setting up liblwp-mediatypes-perl (6.04-2) ...
+Setting up libtry-tiny-perl (0.31-2) ...
+Setting up perl-openssl-defaults:amd64 (7build3) ...
+Setting up libencode-locale-perl (1.05-3) ...
+Setting up libdata-dump-perl (1.25-1) ...
+Setting up libio-html-perl (1.004-3) ...
+Setting up libtimedate-perl (2.3300-2) ...
+Setting up liburi-perl (5.27-1) ...
+Setting up libnet-ssleay-perl:amd64 (1.94-1build4) ...
+Setting up libhttp-date-perl (6.06-1) ...
+Setting up libfile-listing-perl (6.16-1) ...
+Setting up libnet-http-perl (6.23-1) ...
+Setting up libwww-robotrules-perl (6.02-1) ...
+Setting up libhtml-parser-perl:amd64 (3.81-1build3) ...
+Setting up libio-socket-ssl-perl (2.085-1) ...
+Setting up libhttp-message-perl (6.45-1ubuntu1) ...
+Setting up libhtml-form-perl (6.11-1) ...
+Setting up libhttp-negotiate-perl (6.01-2) ...
+Setting up libhttp-cookies-perl (6.11-1) ...
+Setting up libhtml-tree-perl (5.07-3) ...
+Setting up libhtml-format-perl (2.16-2) ...
+Setting up libnet-smtp-ssl-perl (1.04-2) ...
+Setting up libmailtools-perl (2.21-2) ...
+Setting up libhttp-daemon-perl (6.16-1) ...
+Setting up liblwp-protocol-https-perl (6.13-1) ...
+Setting up libwww-perl (6.76-1) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Scanning processes...
+Scanning candidates...
+Scanning linux images...
+
+Pending kernel upgrade!
+Running kernel version:
+  6.8.0-71-generic
+Diagnostics:
+  The currently running kernel version is not the expected kernel
+version 6.8.0-101-generic.
+
+Restarting the system to load the new kernel will not be handled
+automatically, so you should consider rebooting.
+
+Restarting services...
+
+Service restarts being deferred:
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart serial-getty@ttyS0.service
+ systemctl restart systemd-logind.service
+
+No containers need to be restarted.
+
+User sessions running outdated binaries:
+ root @ user manager service: systemd[1844]
+
+No VM guests are running outdated hypervisor (qemu) binaries on this
+ host.
+root@Soundara:~/soundara# GET http://<your-server>/library/file/processed_test_20260308191552.wav
+-bash: your-server: No such file or directory
+root@Soundara:~/soundara# GET http://soundara.co/library/file/process
+ed_test_20260308191552.wav
+Can't connect to soundara.co:80 (Connection refused)
+
+Connection refused at /usr/share/perl5/LWP/Protocol/http.pm line 49.
+root@Soundara:~/soundara# curl -X GET http://localhost:8000/library/file/processed_test_20260308191552.wav
+Warning: Binary output can mess up your terminal. Use "--output -" to tell
+Warning: curl to output it to your terminal anyway, or consider "--output
+Warning: <FILE>" to save to a file.
+root@Soundara:~/soundara# http://<your-droplet-ip>:8000/library/file/processed_test_20260308191552.wav
+
+
+root@Soundara:~/soundara# sudo systemctl restart nginx
+root@Soundara:~/soundara# sudo lsof -i -P -n | grep LISTEN
+systemd       1            root  217u  IPv4  29231      0t0  TCP *:22 (LISTEN)
+systemd       1            root  218u  IPv6  29235      0t0  TCP *:22 (LISTEN)
+systemd-r  7507 systemd-resolve   15u  IPv4  27444      0t0  TCP 127.0.0.53:53 (LISTEN)
+systemd-r  7507 systemd-resolve   17u  IPv4  27446      0t0  TCP 127.0.0.54:53 (LISTEN)
+sshd      16773            root    3u  IPv4  29231      0t0  TCP *:22 (LISTEN)
+sshd      16773            root    4u  IPv6  29235      0t0  TCP *:22 (LISTEN)
+postgres  19999        postgres    6u  IPv6  45587      0t0  TCP [::1]:5432 (LISTEN)
+postgres  19999        postgres    7u  IPv4  45588      0t0  TCP 127.0.0.1:5432 (LISTEN)
+python    31132            root    6u  IPv4 127280      0t0  TCP *:8000 (LISTEN)
+nginx     31771            root    5u  IPv4 132278      0t0  TCP *:80 (LISTEN)
+nginx     31771            root    6u  IPv4 132279      0t0  TCP *:443 (LISTEN)
+nginx     31772        www-data    5u  IPv4 132278      0t0  TCP *:80 (LISTEN)
+nginx     31772        www-data    6u  IPv4 132279      0t0  TCP *:44
+
+root@Soundara:~/soundara# cat  /etc/nginx/sites-enabled/soundara
+server {
+    listen 80;
+    listen 443 ssl;
+    server_name soundara.co www.soundara.co;
+
+    ssl_certificate /etc/letsencrypt/live/soundara.co/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/soundara.co/privkey.pem;
+
+    root /var/www/soundara;  # <- updated
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+
+root@Soundara:~/soundara# sudo nginx -t
+sudo systemctl reload nginx
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@Soundara:~/soundara# curl -I https://soundara.co/library/file/processed_test_20260308191552.wav
+HTTP/1.1 405 Method Not Allowed
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 19:47:59 GMT
+Content-Type: application/json
+Content-Length: 31
+Connection: keep-alive
+allow: GET
+
+root@Soundara:~/soundara# curl -I https://soundara.co/music_library/processed_test_20260308191552.wavcurl -I https://soundara.co/music_library/processed_test_20260308191552.wav
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 19:48:08 GMT
+Content-Type: text/html
+Content-Length: 409
+Last-Modified: Sun, 08 Mar 2026 18:27:50 GMT
+Connection: keep-alive
+ETag: "69adbfa6-199"
+Accept-Ranges: bytes
+
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 19:48:08 GMT
+Content-Type: text/html
+Content-Length: 409
+Last-Modified: Sun, 08 Mar 2026 18:27:50 GMT
+Connection: keep-alive
+ETag: "69adbfa6-199"
+Accept-Ranges: bytes
+
+root@Soundara:~/soundara# nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@Soundara:~/soundara# curl -I https://soundara.co/library/file/processed_test_20260308191552.wav
+HTTP/1.1 405 Method Not Allowed
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 19:47:59 GMT
+Content-Type: application/json
+Content-Length: 31
+Connection: keep-alive
+allow: GET
+
+root@Soundara:~/soundara# curl -I https://soundara.co/music_library/processed_test_20260308191552.wavcurl -I https://soundara.co/music_library/processed_test_20260308191552.wav
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 19:48:08 GMT
+Content-Type: text/html
+Content-Length: 409
+Last-Modified: Sun, 08 Mar 2026 18:27:50 GMT
+Connection: keep-alive
+ETag: "69adbfa6-199"
+Accept-Ranges: bytes
+
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 19:48:08 GMT
+Content-Type: text/html
+root@Soundara:~/soundara#^C2026 18:27:50 GMT
+root@Soundara:~/soundara# sudo nano /etc/nginx/sites-enabled/soundara
+
+
+root@Soundara:~/soundara# sudo nginx -t         # test syntax
+sudo systemctl reload nginx  # apply changes
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@Soundara:~/soundara# curl -I https://soundara.co/music_library/processed_test_20260308191552.wav
+HTTP/1.1 403 Forbidden
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 19:50:27 GMT
+Content-Type: text/html
+Content-Length: 162
+Connection: keep-alive
+
+root@Soundara:~/soundara# sudo mkdir -p /var/www/soundara
+sudo ln -s /root/soundara/music_library /var/www/soundara/music_library
+sudo chown -R www-data:www-data /root/soundara/music_library
+sudo chmod -R 755 /root/soundara/music_library
+root@Soundara:~/soundara# sudo nano /etc/nginx/sites-enabled/soundara
+root@Soundara:~/soundara# curl -I https://soundara.co/music_library/processed_test_20260308191552.wav
+HTTP/1.1 403 Forbidden
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 19:53:14 GMT
+Content-Type: text/html
+Content-Length: 162
+Connection: keep-alive
+
+root@Soundara:~/soundara# sudo nginx -t         # test syntax
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@Soundara:~/soundara# sudo systemctl reload nginx  # apply changes
+root@Soundara:~/soundara# curl -I https://soundara.co/music_library/processed_test_20260308191552.wav
+HTTP/1.1 403 Forbidden
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 19:53:35 GMT
+Content-Type: text/html
+Content-Length: 162
+Connection: keep-alive
+
+root@Soundara:~/soundara# ls -ld /root /root/soundara /root/soundara/music_library
+drwx------ 8 root     root     4096 Mar  8 19:14 /root
+drwxr-xr-x 6 root     root     4096 Mar  8 19:15 /root/soundara
+drwxr-xr-x 2 www-data www-data 4096 Mar  8 19:15 /root/soundara/music_library
+root@Soundara:~/soundara# curl -I https://soundara.co/music_library/processed_test_20260308191552.wav
+HTTP/1.1 403 Forbidden
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 19:54:53 GMT
+Content-Type: text/html
+Content-Length: 162
+Connection: keep-alive
+
+
+root@Soundara:~/soundara# sudo mkdir -p /var/www/soundara
+sudo mv /root/soundara/music_library /var/www/soundara/music_library
+mv: cannot move '/root/soundara/music_library' to a subdirectory of itself, '/var/www/soundara/music_library/music_library'
+root@Soundara:~/soundara# sudo mkdir -p /var/www/soundara
+sudo mv /root/soundara/music_library /var/www/soundara/music_library
+mv: cannot move '/root/soundara/music_library' to a subdirectory of itself, '/var/www/soundara/music_library/music_library'
+root@Soundara:~/soundara# sudo mv /root/soundara/music_library /var/www/
+root@Soundara:~/soundara# sudo chown -R www-data:www-data /var/www/music_library
+sudo chmod -R 755 /var/www/music_library
+root@Soundara:~/soundara# cd ~/soundara/backend/
+root@Soundara:~/soundara/backend# nano main.py
+root@Soundara:~/soundara/backend# sudo nginx -t         # test syntax
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@Soundara:~/soundara/backend# sudo systemctl reload nginx  # apply changes
+root@Soundara:~/soundara/backend# https://soundara.co/music_library/processed_test_20260308191552.wav
+-bash: https://soundara.co/music_library/processed_test_20260308191552.wav: No such file or directory
+root@Soundara:~/soundara/backend# sudo chown -R www-data:www-data /var/www/soundara/music_library
+sudo chmod -R 755 /var/www/soundara/music_library
+chmod: cannot operate on dangling symlink '/var/www/soundara/music_library'
+root@Soundara:~/soundara/backend# sudo nginx -t
+sudo systemctl reload nginx
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@Soundara:~/soundara/backend# curl -I https://soundara.co/music_library/processed_test_20260308191552.wav
+HTTP/1.1 403 Forbidden
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 08 Mar 2026 20:01:15 GMT
+Content-Type: text/html
+Content-Length: 162
+Connection: keep-alive
+
+root@Soundara:~/soundara/backend# client_loop: send disconnect: Connection reset
+PS C:\Users\trevo>
