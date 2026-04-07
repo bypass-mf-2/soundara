@@ -418,7 +418,7 @@ def validate_mode(mode: str) -> str:
     Raises:
         HTTPException: If mode is invalid
     """
-    VALID_MODES = ["gamma", "alpha", "beta", "theta", "delta", "schumann"]
+    VALID_MODES = ["gamma", "alpha", "beta", "theta", "delta", "schumann", "custom"]
     
     mode = mode.lower().strip()
     
