@@ -29,5 +29,9 @@ foreach ($f in @("requirements.txt","music_library.json","playlists.json","curat
     if (Test-Path $f) { scp $f "${SERVER}:/root/soundara/" }
 }
 
+Write-Host "=== Uploading start.sh ==="
+scp start.sh "${SERVER}:/root/soundara/start.sh"
+ssh $SERVER "chmod +x /root/soundara/start.sh"
+
 Write-Host "=== Starting server ==="
 ssh $SERVER "bash /root/soundara/start.sh"
