@@ -32,12 +32,16 @@ export default function Navbar({ user, onLogout }) {
           My Library
         </Link>
         <span style={{ borderRight: "1px solid #ccc", margin: "10px 10px", height: "30px" }}></span>
-        <Link to="/pricing" onClick={() => handleNavClick("pricing")} style={{ marginRight: "0px", marginLeft: "0px"  }}>
-          Pricing
+        <Link to="/tools" onClick={() => handleNavClick("tools")} style={{ marginRight: "0px", marginLeft: "0px" }}>
+          Music Tools
         </Link>
         <span style={{ borderRight: "1px solid #ccc", margin: "10px 10px", height: "30px" }}></span>
         <Link to="/about" onClick={() => handleNavClick("about")} style={{ marginRight: "0px", marginLeft: "0px"  }}>
           About
+        </Link>
+        <span style={{ borderRight: "1px solid #ccc", margin: "10px 10px", height: "30px" }}></span>
+        <Link to="/pricing" onClick={() => handleNavClick("pricing")} style={{ marginRight: "0px", marginLeft: "0px"  }}>
+          Pricing
         </Link>
         <span style={{ borderRight: "1px solid #ccc", margin: "10px 10px", height: "30px" }}></span>
         <Link to="/future" onClick={() => handleNavClick("future")} style={{ marginRight: "0px", marginLeft: "0px" }}>
@@ -47,7 +51,11 @@ export default function Navbar({ user, onLogout }) {
         <Link to="/contact" onClick={() => handleNavClick("contact")}>
           Contact
         </Link>
-        
+        <span style={{ borderRight: "1px solid #ccc", margin: "10px 10px", height: "30px" }}></span>
+        <Link to="/creator" onClick={() => handleNavClick("creator")} style={{ marginRight: "0px", marginLeft: "0px" }}>
+          Creator
+        </Link>
+
       </div>
 
       {/* Right: User info + Sign Out */}

@@ -1,0 +1,18 @@
+{
+  "Focus Mode": {
+    "description": "Alpha + Beta tracks for concentration and alertness",
+    "modes": ["alpha", "beta"]
+  },
+  "Sleep Mode": {
+    "description": "Delta + Theta tracks for deep sleep and relaxation",
+    "modes": ["delta", "theta"]
+  },
+  "Meditation Mode": {
+    "description": "Theta + Schumann tracks for deep meditation and earth resonance",
+    "modes": ["theta", "schumann"]
+  },
+  "Energy Mode": {
+    "description": "Gamma + Beta tracks for cognitive boost and energy",
+    "modes": ["gamma", "beta"]
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import contactImage from "../assets/TrevorGoodwill.JPEG";
+import BASE_URL from "../api.js";
 
 export default function Contact() {
   const [showForm, setShowForm] = useState(false);
@@ -13,7 +14,7 @@ export default function Contact() {
     if (!name || !email || !interest) return alert("Please fill all required fields");
 
     try {
-      const res = await fetch("http://localhost:8000/submit_survey/", {
+      const res = await fetch(`${BASE_URL}/submit_survey/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, interest, notes })

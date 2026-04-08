@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState} from "react";
 import { usePlayer } from "../PlayerContext.jsx";
 import { trackEvent } from "../track_event.js";
+import BASE_URL from "../api.js";
 
 export default function AudioPlayer() {
   const audioRef = useRef(null);
@@ -26,7 +27,7 @@ export default function AudioPlayer() {
 
   const track = playlists[currentPlaylist]?.[currentIndex] || null;
   const audioUrl = track
-    ? `http://localhost:8000/library/file/${track.filename_full}`
+    ? `${BASE_URL}/library/file/${track.filename_full}`
   : "";
 
   useEffect(() => {

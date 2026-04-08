@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 import BASE_URL from "../api.js";
+import FrequencySelector, { PRESETS } from "../components/FrequencySelector.jsx";
 
 export default function Home() {
 
@@ -31,6 +32,8 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [trackName, setTrackName] = useState("");
   const [mode, setMode] = useState("alpha");
+  const [useCustomFreq, setUseCustomFreq] = useState(false);
+  const [customFreqHz, setCustomFreqHz] = useState(10);
   const [message, setMessage] = useState("");
   const [library, setLibrary] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -44,14 +47,7 @@ export default function Home() {
     localStorage.getItem("tosAccepted") === "true"
   );
 
-  const frequencies = [
-    { id: "gamma", name: "Gamma", hertz: "30-100Hz", desc: "High-level cognitive functioning" },
-    { id: "alpha", name: "Alpha", hertz: "8-12Hz", desc: "Relaxed focus & creativity" },
-    { id: "beta", name: "Beta", hertz: "12-30Hz", desc: "Alertness & problem-solving" },
-    { id: "theta", name: "Theta", hertz: "4-8Hz", desc: "Deep meditation & intuition" },
-    { id: "delta", name: "Delta", hertz: "0.5-4Hz", desc: "Deep sleep & recovery" },
-    { id: "schumann", name: "Schumann", hertz: "7.83Hz", desc: "Earth's natural frequency" }
-  ];
+  const frequencies = PRESETS;
 
   // Load library
   const loadLibrary = () => {
@@ -84,7 +80,8 @@ export default function Home() {
     if (file) formData.append("file", file);
     if (url) formData.append("url", url);
     formData.append("track_name", trackName);
-    formData.append("mode", mode);
+    formData.append("mode", useCustomFreq ? "custom" : mode);
+    if (useCustomFreq) formData.append("custom_freq_hz", customFreqHz);
 
     setMessage("Processing...");
     try {
@@ -207,9 +204,14 @@ export default function Home() {
           <form onSubmit={handleSubmit}>
             <input type="file" onChange={e => setFile(e.target.files[0])} /><br />
             <input value={url} onChange={e => setUrl(e.target.value)} placeholder="YouTube URL" /><br />
-            <select value={mode} onChange={e => setMode(e.target.value)}>
-              {frequencies.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
-            </select><br />
+            <FrequencySelector
+              mode={mode}
+              onModeChange={setMode}
+              customFreqHz={customFreqHz}
+              onCustomFreqChange={setCustomFreqHz}
+              useCustom={useCustomFreq}
+              onUseCustomChange={setUseCustomFreq}
+            />
             <input value={trackName} onChange={e => setTrackName(e.target.value)} placeholder="Track Name" /><br />
             <button type="submit">Process</button>
           </form>

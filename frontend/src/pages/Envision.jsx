@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import emailjs from "@emailjs/browser";
 
 export default function Envision() {
   const [showForm, setShowForm] = useState(false);
@@ -6,11 +7,29 @@ export default function Envision() {
   const [email, setEmail] = useState("");
   const [interest, setInterest] = useState("");
   const [notes, setNotes] = useState("");
+  const [submitStatus, setSubmitStatus] = useState("");
 
   const handleSubmit = (e) => {
-  e.preventDefault();
-  console.log({ name, email, interest, notes });
-};
+    e.preventDefault();
+    setSubmitStatus("Sending...");
+    emailjs
+      .send(
+        "YOUR_SERVICE_ID",
+        "YOUR_TEMPLATE_ID",
+        { name, email, interest, notes },
+        "YOUR_PUBLIC_KEY"
+      )
+      .then(() => {
+        setSubmitStatus("Submitted successfully!");
+        setName("");
+        setEmail("");
+        setInterest("");
+        setNotes("");
+      })
+      .catch(() => {
+        setSubmitStatus("Failed to send. Please try again.");
+      });
+  };
 
   return (
     <div style={{ padding: "20px" }}>
@@ -124,6 +143,11 @@ export default function Envision() {
             style={{ display:"block", marginBottom:"10px", width:"100%", padding:"8px", height:"80px" }}
           />
           <button type="submit" style={{ padding:"10px 20px", cursor:"pointer" }}>Submit</button>
+          {submitStatus && (
+            <p style={{ marginTop: "10px", color: submitStatus.includes("success") ? "#4caf50" : submitStatus === "Sending..." ? "#999" : "#f44336" }}>
+              {submitStatus}
+            </p>
+          )}
         </form>
       )}
     </div>

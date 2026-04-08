@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { usePlayer } from "../PlayerContext.jsx";
+import BASE_URL from "../api.js";
+import SearchBar from "../components/SearchBar.jsx";
 
 export default function Library({ user }) {
   const USER_ID = user?.id;
@@ -8,6 +10,8 @@ export default function Library({ user }) {
   const [renamingPlaylist, setRenamingPlaylist] = useState(null);
   const [renameValue, setRenameValue] = useState("");
   const [selectedPlaylistForAdd, setSelectedPlaylistForAdd] = useState("default");
+  const [curatedPlaylists, setCuratedPlaylists] = useState({});
+  const [expandedCurated, setExpandedCurated] = useState(null);
 
   const {
     playlists,
@@ -27,11 +31,18 @@ export default function Library({ user }) {
 
   useEffect(() => {
     if(!USER_ID) return;
-    fetch(`http://localhost:8000/user_library/${USER_ID}`)
+    fetch(`${BASE_URL}/user_library/${USER_ID}`)
       .then(res => res.json())
       .then(data => setTracks(data))
       .catch(err => console.error("Failed to fetch library:", err));
   }, [USER_ID]);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/curated_playlists/`)
+      .then(res => res.json())
+      .then(data => setCuratedPlaylists(data))
+      .catch(err => console.error("Failed to fetch curated playlists:", err));
+  }, []);
 
   const handleCreatePlaylist = () => {
     if (!newPlaylistName.trim()) return;
@@ -50,6 +61,58 @@ export default function Library({ user }) {
 
   return (
     <div style={{ padding: "20px" }}>
+
+      {/* ── Curated Playlists ── */}
+      {Object.keys(curatedPlaylists).length > 0 && (
+        <div style={{ marginBottom: "30px" }}>
+          <h2>Curated Playlists</h2>
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+            {Object.entries(curatedPlaylists).map(([name, data]) => (
+              <div
+                key={name}
+                style={{
+                  border: "1px solid #555",
+                  borderRadius: "8px",
+                  padding: "15px",
+                  minWidth: "200px",
+                  flex: "1 1 200px",
+                  background: expandedCurated === name ? "#2a2a2a" : "#1a1a1a",
+                  cursor: "pointer",
+                }}
+                onClick={() => setExpandedCurated(expandedCurated === name ? null : name)}
+              >
+                <strong style={{ fontSize: "16px" }}>{name}</strong>
+                <p style={{ fontSize: "13px", color: "#aaa", margin: "4px 0" }}>{data.description}</p>
+                <span style={{ fontSize: "12px", color: "#646cff" }}>{data.tracks?.length || 0} tracks</span>
+                <div style={{ marginTop: "8px" }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); playLibrary(data.tracks || []); }}
+                    disabled={!data.tracks?.length}
+                    style={{ fontSize: "12px", padding: "4px 10px" }}
+                  >
+                    Play All
+                  </button>
+                </div>
+
+                {expandedCurated === name && data.tracks?.length > 0 && (
+                  <div style={{ marginTop: "10px", borderTop: "1px solid #444", paddingTop: "8px" }}>
+                    {data.tracks.map((track, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "3px 0", fontSize: "13px" }}>
+                        <span style={{ flex: 1 }}>{track.name} ({track.mode})</span>
+                        <button onClick={(e) => { e.stopPropagation(); addToPlaylist(track, "default"); }} style={{ fontSize: "11px" }}>+ Add</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Search ── */}
+      <SearchBar onTrackSelect={(track) => addToPlaylist(track, "default")} />
+
       {/* ── Library ── */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
         <h2 style={{ margin: 0 }}>My Library</h2>

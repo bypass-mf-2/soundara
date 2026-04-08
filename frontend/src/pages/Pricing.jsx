@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import BASE_URL from "../api.js";
 
 export default function Pricing() {
   const user = localStorage.getItem("userId"); // or however you track logged-in users
@@ -9,7 +10,7 @@ export default function Pricing() {
     if (!user) return;
     const fetchSubscription = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/user_subscriptions/${user}`);
+        const res = await fetch(`${BASE_URL}/user_subscriptions/${user}`);
         if (res.ok) {
           const data = await res.json();
           setUserSub(data); // data = { plan: "limited" | "unlimited", tracks_used: int }
@@ -28,7 +29,7 @@ export default function Pricing() {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/create_subscription_session/", {
+      const response = await fetch(`${BASE_URL}/create_subscription_session/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: user, plan })

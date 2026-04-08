@@ -11,6 +11,8 @@ import Success from "./pages/Success.jsx";
 import Terms from "./pages/Terms.jsx";
 import Privacy from "./pages/Privacy.jsx";
 import DMCA from "./pages/DMCA.jsx";
+import MusicTools from "./pages/MusicTools.jsx";
+import CreatorDashboard from "./pages/CreatorDashboard.jsx";
 import AudioPlayer from "./components/AudioPlayer.jsx";
 
 import { usePlayer } from "./PlayerContext.jsx";
@@ -148,6 +150,8 @@ const addToPlaylist = (track) => {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/dmca" element={<DMCA />} />
+        <Route path="/tools" element={<MusicTools />} />
+        <Route path="/creator" element={<CreatorDashboard />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <AudioPlayer playlist={playlistTracks} userHasBought={userHasBought} />

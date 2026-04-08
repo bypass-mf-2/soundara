@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import BASE_URL from "../api.js";
 
 export default function Success() {
   const [params] = useSearchParams();
@@ -17,7 +18,7 @@ export default function Success() {
       try {
         // 1️⃣ Add track if applicable
         if (trackFile && trackName) {
-          await fetch(`http://localhost:8000/user_library/${user}/add`, {
+          await fetch(`${BASE_URL}/user_library/${user}/add`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -29,7 +30,7 @@ export default function Success() {
 
         // 2️⃣ Activate subscription if applicable
         if (subscription) {
-          await fetch(`http://localhost:8000/user_subscriptions/${user}/activate`, {
+          await fetch(`${BASE_URL}/user_subscriptions/${user}/activate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ plan: subscription }),

@@ -897,5 +897,41 @@
     "type": "audio_play",
     "track": "Die with a smile",
     "timestamp": "2026-03-09T12:22:20.514875"
+  },
+  {
+    "type": "nav_click",
+    "page": "about",
+    "user": "101546456803547093189",
+    "timestamp": "2026-04-06T18:11:42.083402"
+  },
+  {
+    "type": "nav_click",
+    "page": "future",
+    "user": "101546456803547093189",
+    "timestamp": "2026-04-06T18:11:43.435038"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-04-06T19:02:21.269693"
+  },
+  {
+    "type": "nav_click",
+    "page": "tools",
+    "user": "101546456803547093189",
+    "timestamp": "2026-04-06T19:02:33.461019"
+  },
+  {
+    "type": "nav_click",
+    "page": "creator",
+    "user": "101546456803547093189",
+    "timestamp": "2026-04-06T19:02:47.516603"
+  },
+  {
+    "type": "nav_click",
+    "page": "home",
+    "user": "101546456803547093189",
+    "timestamp": "2026-04-06T19:03:04.004080"
   }
 ]
