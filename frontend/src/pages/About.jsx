@@ -15,6 +15,10 @@ export default function About() {
           enjoy the best of both worlds.
         </p>
         <p>
+          Soundara is in version two of its development.
+        </p>
+
+        <p>
           This idea was originally inspired by experiments done by the Monroe Institute
           and the CIA in the 1980s. The program, the "Gateway Experiments" explored conscious enhancement, remote
           viewing, and altered states for intelligence gathering through hemi-sync,

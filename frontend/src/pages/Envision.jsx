@@ -37,21 +37,6 @@ export default function Envision() {
       <p>Here we show version one which hopes to come shortly after release
         and version two which will come later on.
       </p>
-      <h3>Soundara V1:</h3>
-
-      <h4>Custom Frequencies:</h4>
-      <p>Instead of the preset frequencies, users will be able to input their 
-        own frequencies and create custom tracks. This will allow for more personalized
-        experiences and the ability to target specific brainwave states.
-        </p>
-        <p>However this will come at a greater price per track due to customization.</p>
-
-        <h4>Specific Mode Playlists:</h4>
-      <p>Specific mode playlists will available like "Focus Mode" or "Sleep Mode" which 
-        will be curated by our team and based on user feedback. These playlists will be 
-        optimized for their specific use cases and will provide a more tailored experience
-         for users.</p>
-        <p>These mode playlists will be free and selectable.</p>
 
         <h3>Soundara V2:</h3>
 
