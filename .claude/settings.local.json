@@ -3,7 +3,11 @@
     "allow": [
       "Bash(xargs grep:*)",
       "Bash(npm install:*)",
-      "Bash(xargs ls:*)"
+      "Bash(xargs ls:*)",
+      "Bash(ssh -o:*)",
+      "Read(//c/Users/trevo/.ssh/**)",
+      "Bash(ssh -vvv -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@164.92.82.137 \"echo test\")",
+      "Bash(npm run:*)"
     ]
   }
 }
