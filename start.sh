@@ -1,8 +1,15 @@
 #!/bin/bash
 cd /root/soundara
 
+echo "=== Checking venv ==="
+if [ ! -f backend/venv/bin/python ]; then
+  echo "Creating venv..."
+  python3 -m venv backend/venv
+fi
+
 echo "=== Installing dependencies ==="
 backend/venv/bin/pip install -r requirements.txt -q
+backend/venv/bin/pip install python-magic -q 2>/dev/null
 
 echo "=== Restarting backend ==="
 systemctl restart soundara.service

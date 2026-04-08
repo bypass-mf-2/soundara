@@ -301,13 +301,18 @@ export default function Home() {
                 onBlur={() => setTimeout(() => setSongSuggestions([]), 200)} />
               {songSuggestions.length > 0 && (
                 <div style={{
-                  position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10,
-                  background: "#1a1a1a", border: "1px solid #444", borderRadius: 4, maxHeight: 150, overflowY: "auto",
+                  position: "absolute", top: "100%", left: 0, zIndex: 10, minWidth: 300,
+                  background: "#1a1a1a", border: "1px solid #444", borderRadius: 4, maxHeight: 200, overflowY: "auto",
                 }}>
                   {songSuggestions.map((s, i) => (
-                    <div key={i} style={{ padding: "6px 10px", cursor: "pointer", borderBottom: "1px solid #333" }}
-                      onMouseDown={() => { setTrackName(s); setSongSuggestions([]); }}>
-                      {s}
+                    <div key={i} style={{ padding: "8px 10px", cursor: "pointer", borderBottom: "1px solid #333", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                      onMouseDown={() => { setTrackName(s.title); setSongSuggestions([]); }}>
+                      <div>
+                        <div style={{ fontWeight: "bold" }}>{s.title}</div>
+                        {s.artist && <div style={{ fontSize: 11, color: "#888" }}>{s.artist}</div>}
+                      </div>
+                      {s.source === "spotify" && <span style={{ fontSize: 9, color: "#1DB954", marginLeft: 10 }}>Spotify</span>}
+                      {s.source === "library" && <span style={{ fontSize: 9, color: "#4bab07", marginLeft: 10 }}>Library</span>}
                     </div>
                   ))}
                 </div>

@@ -1365,32 +1365,67 @@ async def claim_free_trial(user_id: str, request: Request):
     return {"status": "ok", "message": "Free trial claimed! Track added to your library."}
 
 
+SPOTIFY_TOKEN_CACHE = {"token": None, "expires_at": 0}
+
+def get_spotify_token():
+    """Get Spotify API token using client credentials flow"""
+    if SPOTIFY_TOKEN_CACHE["token"] and time.time() < SPOTIFY_TOKEN_CACHE["expires_at"]:
+        return SPOTIFY_TOKEN_CACHE["token"]
+
+    client_id = os.getenv("SPOTIFY_CLIENT_ID")
+    client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
+    if not client_id or not client_secret:
+        return None
+
+    import base64
+    auth_str = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+    resp = requests.post("https://accounts.spotify.com/api/token",
+        data={"grant_type": "client_credentials"},
+        headers={"Authorization": f"Basic {auth_str}"})
+    if resp.status_code == 200:
+        data = resp.json()
+        SPOTIFY_TOKEN_CACHE["token"] = data["access_token"]
+        SPOTIFY_TOKEN_CACHE["expires_at"] = time.time() + data.get("expires_in", 3600) - 60
+        return data["access_token"]
+    return None
+
+
 @app.get("/song_search")
 async def song_search(q: str = Query("", max_length=200)):
-    """Search for song titles from library and suggest matches"""
+    """Search for song titles using Spotify API + local library"""
     if not q or len(q) < 2:
         return []
-    q_lower = q.lower().strip()
-    suggestions = set()
 
-    # Search existing library
+    results = []
+
+    # Spotify search
+    token = get_spotify_token()
+    if token:
+        try:
+            resp = requests.get("https://api.spotify.com/v1/search",
+                params={"q": q, "type": "track", "limit": 8},
+                headers={"Authorization": f"Bearer {token}"})
+            if resp.status_code == 200:
+                for item in resp.json().get("tracks", {}).get("items", []):
+                    artist = item["artists"][0]["name"] if item.get("artists") else ""
+                    results.append({
+                        "title": item["name"],
+                        "artist": artist,
+                        "source": "spotify",
+                    })
+        except Exception:
+            pass
+
+    # Local library search
+    q_lower = q.lower().strip()
     if os.path.exists(LIBRARY_FILE):
         with open(LIBRARY_FILE, "r") as f:
             library = json.load(f)
         for track in library:
             name = track.get("name", "")
             if q_lower in name.lower():
-                suggestions.add(name)
+                results.append({"title": name, "artist": "", "source": "library"})
 
-    # Search community tracks
-    if os.path.exists(COMMUNITY_FILE):
-        with open(COMMUNITY_FILE, "r") as f:
-            community = json.load(f)
-        for track in community:
-            name = track.get("name", "")
-            if q_lower in name.lower():
-                suggestions.add(name)
-
-    return list(suggestions)[:10]
+    return results[:10]
 
 
