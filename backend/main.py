@@ -1243,30 +1243,154 @@ async def stripe_webhook(request: Request):
     return await handle_stripe_webhook(request)
 
 
-@app.get("/admin/stats")
-async def get_stats(admin_user = Depends(verify_admin)):
-    """Get platform statistics (admin only)"""
+@app.get("/public/stats")
+async def get_public_stats():
+    """Get public platform stats for social proof"""
     try:
         with open(LIBRARY_FILE, "r") as f:
             library = json.load(f)
-        
         with open(USER_LIBRARY_FILE, "r") as f:
             user_library = json.load(f)
-        
+        total_plays = sum(track.get("plays", 0) for track in library)
+        return {
+            "total_tracks": len(library),
+            "total_users": len(user_library),
+            "total_plays": total_plays,
+        }
+    except Exception:
+        return {"total_tracks": 0, "total_users": 0, "total_plays": 0}
+
+
+ADMIN_EMAIL = "trevorm.goodwill@gmail.com"
+
+@app.get("/admin/stats")
+async def get_admin_stats(email: str = Query(...)):
+    """Get full platform statistics (admin only)"""
+    if email != ADMIN_EMAIL:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    try:
+        with open(LIBRARY_FILE, "r") as f:
+            library = json.load(f)
+        with open(USER_LIBRARY_FILE, "r") as f:
+            user_library = json.load(f)
         with open(TRACK_FILE, "r") as f:
             events = json.load(f)
-        
+        with open(SUBS_FILE, "r") as f:
+            subs = json.load(f)
+
         total_plays = sum(track.get("plays", 0) for track in library)
-        total_users = len(user_library)
-        total_tracks = len(library)
-        
+
+        # Event breakdown
+        event_types = {}
+        unique_visitors = set()
+        daily_events = {}
+        for ev in events:
+            t = ev.get("type", "unknown")
+            event_types[t] = event_types.get(t, 0) + 1
+            if ev.get("id") or ev.get("user"):
+                unique_visitors.add(ev.get("id") or ev.get("user"))
+            date = ev.get("timestamp", "")[:10]
+            if date:
+                daily_events[date] = daily_events.get(date, 0) + 1
+
+        # Recent events (last 50)
+        recent_events = events[-50:][::-1]
+
+        # Community uploads
+        community_tracks = []
+        if os.path.exists(COMMUNITY_FILE):
+            with open(COMMUNITY_FILE, "r") as f:
+                community_tracks = json.load(f)
+        pending_uploads = [t for t in community_tracks if t.get("status") == "pending"]
+
         return {
-            "total_tracks": total_tracks,
-            "total_users": total_users,
+            "total_tracks": len(library),
+            "total_users": len(user_library),
             "total_plays": total_plays,
-            "total_events": len(events)
+            "total_events": len(events),
+            "unique_visitors": len(unique_visitors),
+            "active_subscriptions": len(subs),
+            "event_breakdown": event_types,
+            "daily_events": daily_events,
+            "recent_events": recent_events,
+            "pending_uploads": pending_uploads,
+            "library": library,
+            "subscriptions": subs,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+FREE_TRIAL_FILE = os.path.join(BASE_DIR, "free_trials.json")
+if not os.path.exists(FREE_TRIAL_FILE):
+    with open(FREE_TRIAL_FILE, "w") as f:
+        json.dump({}, f)
+
+@app.get("/free_trial/{user_id}")
+async def check_free_trial(user_id: str):
+    """Check if user has used their free trial"""
+    user_id = validate_user_id(user_id)
+    with open(FREE_TRIAL_FILE, "r") as f:
+        trials = json.load(f)
+    return {"used": user_id in trials}
+
+@app.post("/free_trial/{user_id}/claim")
+async def claim_free_trial(user_id: str, request: Request):
+    """Claim free trial — add track to user library for free"""
+    user_id = validate_user_id(user_id)
+    with open(FREE_TRIAL_FILE, "r") as f:
+        trials = json.load(f)
+    if user_id in trials:
+        raise HTTPException(status_code=400, detail="Free trial already used")
+
+    data = await request.json()
+    track = data.get("track")
+    if not track:
+        raise HTTPException(status_code=400, detail="Missing track data")
+
+    # Mark trial as used
+    trials[user_id] = {"claimed_at": datetime.now().isoformat(), "track": track.get("name", "")}
+    with open(FREE_TRIAL_FILE, "w") as f:
+        json.dump(trials, f, indent=2)
+
+    # Add track to user library
+    with open(USER_LIBRARY_FILE, "r") as f:
+        library_data = json.load(f)
+    if user_id not in library_data:
+        library_data[user_id] = []
+    library_data[user_id].append(track)
+    with open(USER_LIBRARY_FILE, "w") as f:
+        json.dump(library_data, f, indent=2)
+
+    return {"status": "ok", "message": "Free trial claimed! Track added to your library."}
+
+
+@app.get("/song_search")
+async def song_search(q: str = Query("", max_length=200)):
+    """Search for song titles from library and suggest matches"""
+    if not q or len(q) < 2:
+        return []
+    q_lower = q.lower().strip()
+    suggestions = set()
+
+    # Search existing library
+    if os.path.exists(LIBRARY_FILE):
+        with open(LIBRARY_FILE, "r") as f:
+            library = json.load(f)
+        for track in library:
+            name = track.get("name", "")
+            if q_lower in name.lower():
+                suggestions.add(name)
+
+    # Search community tracks
+    if os.path.exists(COMMUNITY_FILE):
+        with open(COMMUNITY_FILE, "r") as f:
+            community = json.load(f)
+        for track in community:
+            name = track.get("name", "")
+            if q_lower in name.lower():
+                suggestions.add(name)
+
+    return list(suggestions)[:10]
 
 

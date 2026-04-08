@@ -56,6 +56,15 @@ export default function Navbar({ user, onLogout }) {
           Creator
         </Link>
 
+        {user?.email === "trevorm.goodwill@gmail.com" && (
+          <>
+            <span style={{ borderRight: "1px solid #ccc", margin: "10px 10px", height: "30px" }}></span>
+            <Link to="/dashboard" onClick={() => handleNavClick("dashboard")} style={{ color: "#4bab07" }}>
+              Dashboard
+            </Link>
+          </>
+        )}
+
       </div>
 
       {/* Right: User info + Sign Out */}

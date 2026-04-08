@@ -46,6 +46,9 @@ export default function Home() {
   const [tosAccepted, setTosAccepted] = useState(
     localStorage.getItem("tosAccepted") === "true"
   );
+  const [platformStats, setPlatformStats] = useState(null);
+  const [freeTrialUsed, setFreeTrialUsed] = useState(false);
+  const [songSuggestions, setSongSuggestions] = useState([]);
 
   const frequencies = PRESETS;
 
@@ -62,6 +65,55 @@ export default function Home() {
   };
 
   useEffect(() => { loadLibrary(); }, []);
+
+  // Load platform stats for social proof
+  useEffect(() => {
+    fetch(`${BASE_URL}/public/stats`)
+      .then((r) => r.json())
+      .then(setPlatformStats)
+      .catch(() => {});
+  }, []);
+
+  // Check free trial status
+  useEffect(() => {
+    if (!USER_ID) return;
+    fetch(`${BASE_URL}/free_trial/${USER_ID}`)
+      .then((r) => r.json())
+      .then((data) => setFreeTrialUsed(data.used))
+      .catch(() => {});
+  }, [USER_ID]);
+
+  // Song title autocomplete
+  useEffect(() => {
+    if (trackName.length < 2) { setSongSuggestions([]); return; }
+    const timer = setTimeout(() => {
+      fetch(`${BASE_URL}/song_search?q=${encodeURIComponent(trackName)}`)
+        .then((r) => r.json())
+        .then(setSongSuggestions)
+        .catch(() => setSongSuggestions([]));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [trackName]);
+
+  // Claim free trial
+  const handleFreeTrial = async (track) => {
+    try {
+      const res = await fetch(`${BASE_URL}/free_trial/${USER_ID}/claim`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ track }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Free trial claimed! Track added to your library.");
+        setFreeTrialUsed(true);
+      } else {
+        alert(data.detail || "Failed to claim free trial.");
+      }
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
 
   useEffect(() => {
     const wasReturningFromPolicy = sessionStorage.getItem("showTosPopup");
@@ -196,6 +248,38 @@ export default function Home() {
   return (
     <div style={{ padding: "20px" }}>
 
+      {/* Social Proof Stats */}
+      {platformStats && (
+        <div style={{
+          display: "flex", justifyContent: "center", gap: 40, padding: "15px 0",
+          marginBottom: 20, borderBottom: "1px solid #333",
+        }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 24, fontWeight: "bold", color: "#4bab07" }}>{platformStats.total_tracks}</div>
+            <div style={{ fontSize: 12, color: "#aaa" }}>Tracks Created</div>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 24, fontWeight: "bold", color: "#007bff" }}>{platformStats.total_users}</div>
+            <div style={{ fontSize: 12, color: "#aaa" }}>Users</div>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 24, fontWeight: "bold", color: "#ff6b35" }}>{platformStats.total_plays}</div>
+            <div style={{ fontSize: 12, color: "#aaa" }}>Total Plays</div>
+          </div>
+        </div>
+      )}
+
+      {/* Free Trial Banner */}
+      {!freeTrialUsed && (
+        <div style={{
+          background: "linear-gradient(90deg, #1a3a1a, #0a2a0a)", border: "1px solid #4bab07",
+          borderRadius: 8, padding: "12px 20px", marginBottom: 20, textAlign: "center",
+        }}>
+          <strong style={{ color: "#4bab07" }}>First track free!</strong>
+          <span style={{ marginLeft: 10, color: "#ccc" }}>Process any song and get it added to your library at no cost.</span>
+        </div>
+      )}
+
       <div style={{ display: "flex", gap: "20px" }}>
 
         {/* Upload */}
@@ -212,7 +296,23 @@ export default function Home() {
               useCustom={useCustomFreq}
               onUseCustomChange={setUseCustomFreq}
             />
-            <input value={trackName} onChange={e => setTrackName(e.target.value)} placeholder="Track Name" /><br />
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <input value={trackName} onChange={e => setTrackName(e.target.value)} placeholder="Track Name"
+                onBlur={() => setTimeout(() => setSongSuggestions([]), 200)} />
+              {songSuggestions.length > 0 && (
+                <div style={{
+                  position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10,
+                  background: "#1a1a1a", border: "1px solid #444", borderRadius: 4, maxHeight: 150, overflowY: "auto",
+                }}>
+                  {songSuggestions.map((s, i) => (
+                    <div key={i} style={{ padding: "6px 10px", cursor: "pointer", borderBottom: "1px solid #333" }}
+                      onMouseDown={() => { setTrackName(s); setSongSuggestions([]); }}>
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div><br />
             <button type="submit">Process</button>
           </form>
 
@@ -235,9 +335,17 @@ export default function Home() {
                   Download
                 </a>
               ) : (
-                <button onClick={() => handleBuy(lastProcessed)}>
-                  Buy to Download
-                </button>
+                <div style={{ display: "flex", gap: 10, marginTop: 5 }}>
+                  {!freeTrialUsed && (
+                    <button onClick={() => handleFreeTrial(lastProcessed)}
+                      style={{ backgroundColor: "#4bab07", color: "#fff", border: "none", padding: "8px 16px", borderRadius: 4, cursor: "pointer" }}>
+                      Claim Free Trial
+                    </button>
+                  )}
+                  <button onClick={() => handleBuy(lastProcessed)}>
+                    Buy to Download (${((lastProcessed.price_cents) / 100).toFixed(2)})
+                  </button>
+                </div>
               )}
             </div>
           )}
