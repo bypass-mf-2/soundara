@@ -51,6 +51,9 @@ export default function MusicTools() {
     setUploadMessage("Uploading...");
     try {
       const res = await fetch(`${BASE_URL}/community/upload/`, { method: "POST", body: formData });
+      if (!res.ok) {
+        throw new Error(`Server ${res.status}: ${res.statusText || "upload rejected"}`);
+      }
       const data = await res.json();
       if (data.status === "success") {
         setUploadMessage("Upload successful! Your track is pending review.");

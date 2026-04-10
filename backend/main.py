@@ -11,6 +11,7 @@ import uuid
 import requests
 import stripe
 import time
+import tempfile
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -186,9 +187,10 @@ app.add_middleware(
 )
 
 # Trusted host middleware
+# NOTE: do not include "*" here — it makes the middleware a no-op.
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["soundara.co", "www.soundara.co", "localhost", "127.0.0.1", "*"]
+    allowed_hosts=["soundara.co", "www.soundara.co", "localhost", "127.0.0.1"]
 )
 
 # Load free users
@@ -306,13 +308,15 @@ def check_subscription(user_id: str):
 
 
 def make_binaural_from_file(path: str, freq_shift_hz: float):
-    data, sr = sf.read(path)
+    data, sr = sf.read(path, dtype="float32")
     if data.ndim == 2:
-        mono = np.mean(data, axis=1)
+        mono = np.mean(data, axis=1, dtype=np.float32)
     else:
         mono = data
     semitones = 12 * np.log2(1 + freq_shift_hz / sr)
-    shifted = librosa.effects.pitch_shift(y=mono, sr=sr, n_steps=semitones)
+    shifted = librosa.effects.pitch_shift(
+        y=mono, sr=sr, n_steps=semitones, res_type="polyphase"
+    )
     min_len = min(len(mono), len(shifted))
     mono = mono[:min_len]
     shifted = shifted[:min_len]
@@ -388,24 +392,34 @@ def add_to_library(track_name: str, full_path: str, mode: str, custom_freqs=None
 
 
 def download_youtube_audio(url: str, output_path: str):
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': 'temp_audio.%(ext)s',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'wav',
-            'preferredquality': '192',
-        }],
-        'ffmpeg_location': os.getenv('FFMPEG_PATH', r'C:\Users\trevo\Downloads\ffmpeg\bin')
-    }
+    # Use a private tmpdir so concurrent downloads don't collide on a shared
+    # filename, and so we never write into the process CWD.
+    tmpdir = tempfile.mkdtemp(prefix="yt_")
+    try:
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': os.path.join(tmpdir, 'audio.%(ext)s'),
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'wav',
+                'preferredquality': '192',
+            }],
+        }
+        # Only override ffmpeg_location if the env var is explicitly set.
+        # Otherwise let yt-dlp find ffmpeg on PATH (works on Linux servers).
+        ffmpeg_location = os.getenv('FFMPEG_PATH')
+        if ffmpeg_location:
+            ydl_opts['ffmpeg_location'] = ffmpeg_location
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
 
-    if os.path.exists('temp_audio.wav'):
-        os.rename('temp_audio.wav', output_path)
-    else:
-        raise RuntimeError("Failed to download YouTube audio.")
+        wav_path = os.path.join(tmpdir, 'audio.wav')
+        if not os.path.exists(wav_path):
+            raise RuntimeError("Failed to download YouTube audio.")
+        shutil.move(wav_path, output_path)
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
 
 # --------------------
@@ -494,16 +508,18 @@ async def add_to_user_library(user_id: str, request: Request):
 
 @app.get("/library/file/{filename}")
 async def get_audio_file_endpoint(filename: str):
-    path = os.path.join(LIBRARY_FOLDER, filename)
+    safe = sanitize_filename(filename)
+    library_root = os.path.abspath(LIBRARY_FOLDER)
+    path = os.path.abspath(os.path.join(library_root, safe))
 
-    print("REQUESTED:", filename)
-    print("FULL PATH:", path)
-    print("EXISTS:", os.path.exists(path))
+    # Reject anything that escapes the library folder
+    if os.path.dirname(path) != library_root:
+        raise HTTPException(status_code=400, detail="Invalid filename")
 
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail="File not found")
 
-    return FileResponse(path, media_type="audio/wav", filename=filename)
+    return FileResponse(path, media_type="audio/wav", filename=safe)
 
 
 @app.post("/process_audio/")
@@ -515,13 +531,12 @@ async def process_audio(
     mode: str = Form(...),
     custom_freq_hz: Optional[float] = Form(None),
 ):
-    if not file and not url:
-        return {"status": "error", "message": "No input provided"}
-
-
     """
     Process audio file with binaural beats
     """
+    if not file and not url:
+        return {"status": "error", "message": "No input provided"}
+
     client_ip = request.client.host if request.client else "unknown"
     
     # Apply endpoint-specific rate limit
@@ -539,8 +554,12 @@ async def process_audio(
             # Validate file
             validate_file_extension(file.filename)
             
-            # Save uploaded file temporarily
-            tmp_path = os.path.join(BASE_DIR, f"temp_{sanitize_filename(file.filename)}")
+            # Save uploaded file temporarily — uuid prefix prevents
+            # collisions between concurrent uploads of the same filename.
+            tmp_path = os.path.join(
+                BASE_DIR,
+                f"temp_{uuid.uuid4().hex}_{sanitize_filename(file.filename)}",
+            )
             with open(tmp_path, "wb") as f:
                 content = await file.read()
                 f.write(content)
@@ -560,7 +579,7 @@ async def process_audio(
             # Validate YouTube URL
             url = validate_youtube_url(url)
 
-            tmp_path = os.path.join(BASE_DIR, "temp_youtube.wav")
+            tmp_path = os.path.join(BASE_DIR, f"temp_youtube_{uuid.uuid4().hex}.wav")
             try:
                 download_youtube_audio(url, tmp_path)
                 validate_audio(tmp_path)
@@ -704,7 +723,10 @@ async def community_upload(
 
     # Validate file
     validate_file_extension(file.filename)
-    tmp_path = os.path.join(BASE_DIR, f"temp_community_{sanitize_filename(file.filename)}")
+    tmp_path = os.path.join(
+        BASE_DIR,
+        f"temp_community_{uuid.uuid4().hex}_{sanitize_filename(file.filename)}",
+    )
     try:
         with open(tmp_path, "wb") as f:
             content = await file.read()
@@ -795,6 +817,7 @@ async def serve_community_file(filename: str):
 @app.post("/community/moderate/{track_id}")
 async def moderate_community_track(track_id: str, request: Request):
     """Admin approve/reject community track"""
+    _require_admin(request)
     body = await request.json()
     action = body.get("action", "").lower()
     if action not in ("approved", "rejected"):
@@ -943,7 +966,7 @@ async def create_community_checkout(request: Request):
     user_id = body.get("user_id", "")
     user_email = body.get("user_email", "")
 
-    validate_user_id(user_id)
+    user_id = validate_user_id(user_id)
 
     # Find the community track
     if not os.path.exists(COMMUNITY_FILE):
@@ -1024,7 +1047,7 @@ async def track_event(request: Request):
                 library = json.load(f)
             for track in library:
                 if track["name"] == track_name:
-                    track["plays"] += 1
+                    track["plays"] = track.get("plays", 0) + 1
                     break
             with open(LIBRARY_FILE, "w") as f:
                 json.dump(library, f, indent=2)
@@ -1219,12 +1242,13 @@ async def play_track(track_name: str, user_id: str):
     is_subscribed = False
 
     if user_sub:
-        plan = user_sub["plan"]
+        plan = user_sub.get("plan")
+        tracks_used = user_sub.get("tracks_used", 0)
         if plan == "unlimited":
             is_subscribed = True
-        elif plan == "limited" and user_sub["tracks_used"] < 20:
+        elif plan == "limited" and tracks_used < 20:
             is_subscribed = True
-            user_sub["tracks_used"] += 1
+            user_sub["tracks_used"] = tracks_used + 1
             with open(SUBS_FILE, "w") as f:
                 json.dump(subs, f, indent=2)
 
@@ -1262,12 +1286,24 @@ async def get_public_stats():
 
 
 ADMIN_EMAIL = "trevorm.goodwill@gmail.com"
+ADMIN_API_TOKEN = os.getenv("ADMIN_API_TOKEN")
+
+
+def _require_admin(request: Request):
+    """Constant-time check of the X-Admin-Token header against the env token."""
+    if not ADMIN_API_TOKEN:
+        # Fail closed: if the server isn't configured, no one is admin.
+        raise HTTPException(status_code=503, detail="Admin API not configured")
+    provided = request.headers.get("x-admin-token", "")
+    import hmac
+    if not hmac.compare_digest(provided, ADMIN_API_TOKEN):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
 
 @app.get("/admin/stats")
-async def get_admin_stats(email: str = Query(...)):
+async def get_admin_stats(request: Request):
     """Get full platform statistics (admin only)"""
-    if email != ADMIN_EMAIL:
-        raise HTTPException(status_code=403, detail="Not authorized")
+    _require_admin(request)
     try:
         with open(LIBRARY_FILE, "r") as f:
             library = json.load(f)

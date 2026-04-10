@@ -13,7 +13,9 @@
       "Bash(curl -sk -o /dev/null -w \"%{http_code}\" https://164.92.82.137/)",
       "Bash(nslookup soundara.co)",
       "Bash(curl -sI http://soundara.co/)",
-      "Bash(curl -sv http://164.92.82.137/)"
+      "Bash(curl -sv http://164.92.82.137/)",
+      "Bash(python -m py_compile main.py)",
+      "Bash(python -m py_compile C:/Users/trevo/OneDrive/Desktop/binaural_music/backend/main.py)"
     ]
   }
 }

@@ -14,7 +14,10 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (user?.email !== ADMIN_EMAIL) return;
-    fetch(`${BASE_URL}/admin/stats?email=${encodeURIComponent(user.email)}`)
+    const adminToken = localStorage.getItem("admin_token") || "";
+    fetch(`${BASE_URL}/admin/stats`, {
+      headers: { "X-Admin-Token": adminToken },
+    })
       .then((r) => r.json())
       .then((data) => { setStats(data); setLoading(false); })
       .catch(() => setLoading(false));
@@ -218,7 +221,10 @@ export default function AdminDashboard() {
                       onClick={async () => {
                         await fetch(`${BASE_URL}/community/moderate/${track.id}`, {
                           method: "POST",
-                          headers: { "Content-Type": "application/json" },
+                          headers: {
+                            "Content-Type": "application/json",
+                            "X-Admin-Token": localStorage.getItem("admin_token") || "",
+                          },
                           body: JSON.stringify({ action: "approved" }),
                         });
                         window.location.reload();
@@ -231,7 +237,10 @@ export default function AdminDashboard() {
                       onClick={async () => {
                         await fetch(`${BASE_URL}/community/moderate/${track.id}`, {
                           method: "POST",
-                          headers: { "Content-Type": "application/json" },
+                          headers: {
+                            "Content-Type": "application/json",
+                            "X-Admin-Token": localStorage.getItem("admin_token") || "",
+                          },
                           body: JSON.stringify({ action: "rejected" }),
                         });
                         window.location.reload();
